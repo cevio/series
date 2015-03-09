@@ -1,0 +1,22 @@
+﻿{
+	"name": "express",
+	"description": "IIS Node 核心运行框架，用于网站搭建和服务。基本兼容NODEJS的express框架，承载量大，采用404来接管URL的路由，是一套理想的框架体系。",
+	"version": "1.0.0",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-module-express"
+	},
+	"homepage": "http://api.webkits.cn/module/express",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md",
+	"main": "./dist/express.min.js"
+}

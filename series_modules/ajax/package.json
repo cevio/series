@@ -1,0 +1,22 @@
+﻿{
+	"name": "ajax",
+	"description": "运行在服务端的Ajax请求服务。基于series才能运行。",
+	"version": "1.0.1",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"main": "index.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-modules-ajax"
+	},
+	"homepage": "http://api.webkits.cn/modules/ajax",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "README.md"
+}

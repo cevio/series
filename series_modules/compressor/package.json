@@ -1,0 +1,22 @@
+﻿{
+	"name": "compressor",
+	"description": "此模块作用于大模块之间的模块合并，将入口模块依赖的所有模块都打包成一个文件，减少FSO操作次数，提高效率",
+	"version": "1.0.3",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-module-compressor"
+	},
+	"homepage": "http://api.webkits.cn/module/compressor",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md",
+	"main": "index.js"
+}

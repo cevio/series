@@ -1,0 +1,22 @@
+﻿{
+	"name": "zip",
+	"description": "无需开启特殊权限，可以直接运行于普通虚拟主机上的ASP ZIP压缩解压程序。基于jszip库实现，直接在服务端创建或者解包zip文件。",
+	"version": "1.0.0",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-module-express"
+	},
+	"homepage": "http://api.webkits.cn/module/zip",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md",
+	"main": "./index.js"
+}

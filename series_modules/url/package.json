@@ -1,0 +1,32 @@
+﻿{
+	"name": "url",
+	"description": "url module for series or brower.",
+	"version": "1.0.0",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"main": "index.js",
+	"dev": "url.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/url"
+	},
+	"homepage": "http://series.webkits.cn/modules/url",
+	"keywords": [
+		"javascript",
+		"url",
+		"session",
+		"series",
+		"framework",
+		"web",
+		"api"
+	],
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "no file found"
+}

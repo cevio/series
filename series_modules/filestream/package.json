@@ -1,0 +1,23 @@
+﻿{
+	"name": "filestream",
+	"description": "对文件进行二进制处理，或者发送文件，或者下载文件。对文件类型进行统一管理。",
+	"version": "1.0.5",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"main": "index.js",
+	"dev": "filestream.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-modules-filestream"
+	},
+	"homepage": "http://api.webkits.cn/module/filestream",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md"
+}
