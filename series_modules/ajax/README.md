@@ -19,3 +19,16 @@ $.getJSON = ajax.getJSON;
 ```
 
 请参看以上实例，然后阅读 [http://www.css88.com/jqapi-1.9/jQuery.ajax/](http://www.css88.com/jqapi-1.9/jQuery.ajax/) 这里的文档说，基本相同。
+
+## spm support ##
+
+>ajax get url args...
+
+基本命令如上。有这些其他命令
+
+* get
+* getJSON
+* post
+* postJSON
+* getScript
+* postScript

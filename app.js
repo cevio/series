@@ -24,7 +24,8 @@ app.get('/spm/:action?', function(req, res){
 	var action = req.params.action;
 	if ( !action ){
 		var locals = {
-			__dirname: __dirname + '\\series_spm'
+			__dirname: __dirname + '\\series_spm',
+			deps: require('./series_spm/deps.js')
 		};
 		res.render('index', locals, function(err, str){
 			if ( err ){

@@ -47,3 +47,23 @@ file.send(require.resolve('./dist/index.zip'));
 ``` javascript
 file.download('http://api.webkits.cn/coms.zip', require.resolve('../dist/news.zip'));
 ```
+
+##spm support##
+
+> filestream download url pather
+
+将url文件下载到服务器pather
+
+``` html
+filestream download http://api.webkits.cn/test.zip ../upload/z.zip
+```
+
+> filestream mime ext
+
+获取ext文件后缀的mime类型
+
+``` html
+filestream mime .js
+```
+
+> \- @ application/x-javascript

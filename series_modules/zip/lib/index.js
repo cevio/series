@@ -4,11 +4,43 @@ exports.zip = ZIP;
 exports.unZip = UNZIP;
 exports.jszip = jszip;
 
-
 function ZIP(folder, file){
-	var zip = new jszip()
-		,	content = findParse(folder, zip, folder);
+	// 遍历文件夹
+	var files = [], folders = [];
+	var findFiles = function(fldr){
+		var schems = fs.readDir(fldr);
+		var fls = schems.file;
+		var fds = schems.dir;
+		
+		if ( fls.length === 0 ) {
+			folders.push(fldr);
+		}else{
+			_.each(fls, function(fl){
+				files.push(String(fl));
+			});
+		}
+		
+		_.each(fds, function(fd){
+			findFiles(String(fd));
+		});
+	}
 	
+	findFiles(folder);
+	
+	// 将空文件夹压入zip
+	var zip = new jszip(), relative;
+	_.each(folders, function(fd){
+		relative = path.relative(folder, fd);
+		zip.folder(relative);
+	});
+	
+	// 将文件内容压入zip
+	_.each(files, function(fl){
+		relative = path.relative(folder, fl);
+		zip.file(relative, BinToBuffer(fs.readFile(fl, {encoding:'buffer'})));
+	});
+	
+	// 保存zip文件
 	var content = zip.generate({type:"base64"});
 	fs.writeFile(file, base64OrBin(content));
 }
@@ -34,30 +66,24 @@ function UNZIP(file, folder){
 	});
 }
 
-function findParse(folder, zip, base){
-	var schems = fs.readDir(folder);
-	var files = schems.file;
-	var dirs = schems.dir;
-	var _base = path.relative(base, folder) || '';
-	
-	_.each(files, function(file){
-		var _file = path.basename(file);
-		var b64 = base64OrBin(fs.readFile(file, {encoding:'buffer'}));
-		var pather = _file; 
-		zip.file(pather, b64, {base64: true});
-	});
-	
-	_.each(dirs, function(dir){
-		dir = String(dir);
-		findParse(dir, zip.folder(path.basename(dir)), base);
-	});
-}
-
 function base64OrBin(obj) {
     var xml = new ActiveXObject('Microsoft.XMLDOM');
-    var node = xml.createElement("obj");
-    node.dataType = "bin.base64";
+    var node = xml.createElement('obj');
+    node.dataType = 'bin.base64';
     obj = 'string' == typeof obj ? (node.text = obj, node.nodeTypedValue) : (node.nodeTypedValue = obj, node.text);
     node = xml = null;
     return obj;
+}
+
+function BinToBuffer(bin) {
+	var buf = [];
+	with (new ActiveXObject('Microsoft.XMLDOM').createElement('node')) {
+		dataType = 'bin.hex';
+		nodeTypedValue = bin;
+		var hex = text;
+		hex.replace(/../g, function($0) {
+			buf.push(parseInt($0, 16));
+		});
+	};
+	return buf;
 }

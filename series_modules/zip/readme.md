@@ -37,3 +37,21 @@ folder：目标文件夹的完整路径。
 ```
 
 查看更多关于jszip的内容  [http://stuk.github.io/jszip/](http://stuk.github.io/jszip)
+
+##spm support##
+
+> zip compress dir file
+
+将dir文件夹ZIP压缩到file文件
+
+``` html
+zip compress ../src ../src.zip
+```
+
+> zip uncompress file dir
+
+将file文件ZIP解压到dir文件夹
+
+``` html
+zip uncompress ../src.zip ../src
+```

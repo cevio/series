@@ -8,10 +8,52 @@ var
 			throw new Error('ajaxResponseCompileError: ' + e.message);
 		});
 	}),
-	ResponseDataTypes = {};
+	ResponseDataTypes = {},
+	ajaxModules = {};
 	
 ajax.instance(event).extend(event);
 ajax.property('object', new ActiveXObject("Microsoft.XMLHTTP"));
+
+var scriptModule = function(dir){
+	this.dirname = dir;
+}
+
+scriptModule.prototype.resolve = function(pather){
+	return path.resolve(this.dirname, pather).replace(/\\/g, '/');
+}
+
+scriptModule.prototype.require = function(pather){
+	pather = this.resolve(pather);
+	if ( ajaxModules[pather] ){
+		return ajaxModules[pather];
+	}
+	var inquire = (new script(pather));
+	return inquire.main;
+}
+
+var script = function(text, url){
+	this.filename = url;
+	this.dirname = path.dirname(url.replace(/\#.+/, '').replace(/\?.+/, '')).replace(/\\/g, '/');
+	this.text = text;
+	
+	this.handle();
+}
+
+script.prototype.handle = function(){
+	var series = new scriptModule(this.dirname);
+	var exports = series.exports = {};
+	var _require = series.require.bind(series);
+	_require.resolve = series.resolve.bind(series);
+	
+	var methods = ['exports', 'require', 'module', '__filename', '__dirname'];
+	var wrapper = ['return function (' + methods.join(',') + '){', this.text, '};'].join("\n");
+	var bag = (new Function(wrapper))();
+	
+	bag(exports, _require, series, this.filename, this.dirname);
+	ajaxModules[this.filename] = series.exports;
+	
+	this.main = series.exports;
+}
 
 function toURLQueryString(keyCode){
 	if ( _.isUndefined(keyCode) || _.isNull(keyCode) || keyCode === false || keyCode === 0 || keyCode === '' ){
@@ -51,30 +93,30 @@ function BinaryToString(text, charset){
 	return ret;
 }
 
-ResponseDataTypes.xml = ResponseDataTypes.html = ResponseDataTypes.text = function(object, charset){
+ResponseDataTypes.html = ResponseDataTypes.text = function(object, charset){
 	return BinaryToString(object.responseBody, charset);
 };
 
 ResponseDataTypes.json = function(object, charset){
-	return JSON.parse(this.text(object, charset));
+	return JSON.parse(BinaryToString(object.responseBody, charset));
 };
 
 ResponseDataTypes.binary = function(object, charset){
 	return object.responseBody;
 };
+ResponseDataTypes.xml = function(object, charset){
+	var text = BinaryToString(object.responseBody, charset)
+		,	xml = require('xml')
+		, $;
+		
+	try{ $ = xml.load(text);}catch(e){};
+	
+	return $;
+}
 
-ResponseDataTypes.script = function(object, charset){
-	var 
-		code = this.text(object, charset),
-		methods = ['exports', 'module'],
-	 	wrapper = ['return function (' + methods.join(',') + '){', code, '};'].join("\n"),
-		bag = (new Function(wrapper))(),
-		_module = {};
-	
-	_module.exports = {};
-	bag(_module.exports, _module);
-	
-	return _module.exports;
+ResponseDataTypes.script = function(object, charset, url){
+	var code = BinaryToString(object.responseBody, charset);
+	return (new script(code, url)).main;
 };
 
 ajax.property('defaults', {
@@ -110,8 +152,13 @@ ajax.define('main', function(options){
 		context = object,
 		timer = new Date().getTime(),
 		ResponseData = null;
-		
+	
 	options = _.extend(defaults, options);
+
+	if ( options.dataType === 'script' && options.type === 'GET' && ajaxModules[options.url] ){
+		return ajaxModules[options.url];
+	}
+	
 	
 	if ( options.xhr ){
 		object = options.xhr;

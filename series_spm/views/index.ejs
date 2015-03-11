@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <title>无标题文档</title>
-<script src="http://api.webkits.cn/resources/jquery/jquery-2.1.3.min.js"></script>
+<script language="javascript" type="text/javascript" src="http://api.webkits.cn/dist/series.min.js"></script>
+<script language="javascript" type="text/javascript" src="http://api.webkits.cn/resources/series.map.js"></script>
 </head>
 <style>
 *, body, html{ padding:0; margin:0; line-height:20px; font-family:"Open Sans", sans-serif;}
@@ -32,6 +33,11 @@ li.error span{ color:#F00;}
   	<div class="input"><input type="text" value="" id="cmd"></div>
  	</div>
 </div>
-<script src="/series_spm/command.js"></script>
+<script type="text/javascript">
+window.spmDeps = <%-JSON.stringify(deps)%>;
+require(['/series_spm/command.js'], function(command){
+	_.isFunction(command) && command();
+});
+</script>
 </body>
 </html>

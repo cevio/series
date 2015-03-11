@@ -2,13 +2,33 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>无标题文档</title>
+<title>IIS Node Server Engine</title>
 </head>
 <style>
 body{ margin:110px 135px;font: 14px/1.6 "Open Sans", sans-serif}
+a{ color:#000;}
 </style>
 <body>
 <h1>Express</h1>
 <p>Welcome to use IIS Node. </p>
+<h5>实现代码：</h5>
+<pre>
+var 
+	express = require('express'),
+	app = express();
+
+app.get('/', function(req, res){
+	res.render('index', {}, function(err, str){
+		if ( err ){
+			res.log(err.message);
+		}else{
+			res.log(str);
+		}
+	});
+});
+
+module.exports = app.listen.bind(app);
+</pre>
+<p><a href="/spm">&gt; Enter SPM Server System</a></p>
 </body>
 </html>

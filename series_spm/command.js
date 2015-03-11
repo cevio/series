@@ -1,143 +1,202 @@
-(function(){
-	var doing = false;
+(function (mod) {
+	// commonjs support
+	if ( 
+		typeof exports == "object" && 
+		typeof module == "object"
+	){ 
+		module.exports = mod(true); 
+	}
+	
+	// amd support
+	else if (
+		typeof define == "function" && 
+		define.amd
+	){ 
+		return define(['jquery'], mod); 
+	}
+	
+	// brower support
+	else { 
+		window.command = mod(); 
+	}
+})(function( jQuery ){
+	
+	if ( !window.$ ){
+		window.$ = jQuery;
+	}
+	
 	var web = 'http://api.webkits.cn';
 	var jsonp = 'iisnode';
+	var slice = Array.prototype.slice;
 	
-	$('#cmd').on('keyup', function(event){ if ( event.keyCode === 13 && !doing ){ parseCMD(); } });
-	$('#cmd').on('blur', function(){ $(this).focus(); }).focus();
-	
-	function pushError(msg){
-		$('.message ul').append('<li class="error"><span>&gt; @ ERROR: </span>' + msg + '</li>');		
+	function init(){
+		$('#cmd').on('keyup', function(event){ if ( event.keyCode === 13 ){ init.main($('#cmd').val()); } });
+		$('#cmd').on('blur', function(){ $(this).focus(); }).focus();
 	}
 	
-	function pushLine(msg){
-		$('.message ul').append('<li>' + msg + '</li>');		
-	}
-	
-	function parseCMD(){
-		var value = $('#cmd').val();
-		if (value.length > 0){
-			value = value.replace(/\s+/g, ' ').split(' ');
-			var spm = value[0];
-			var method = value[1];
-			var args = value.slice(2) || [];
-			
-			pushLine('<font color="#FC6">- &gt; ' + value.join(' ') + '</font>');
-			
-			if ( /spm/i.test(spm) ){
-				if ( command[method] ){
-					command[method].apply($('.message ul'), args);
-				}else{
-					sendCMD(value.join(' '));
+	init.remote = function(url, data){
+		return new Promise(function(resolve, reject){
+			$.ajax({
+				url: web + '/spm/' + url,
+				dataType: 'jsonp',
+				data: data || {},
+				jsonp: jsonp,
+				timeout: 3 * 60 * 1000,
+				success: function(msg){
+					resolve(msg);
+				},
+				error: function(xhr, status){
+					try{
+						xhr.abort();
+					}catch(e){}
+					reject(status);
 				}
-			}else{
-				pushError('no support namespace.');
-			}
-		}
-	}
-	
-	function post(data, callback){
-		doing = true;
-		$.post('/spm/cmd', data, function(msg){
-			if ( msg.error === 0 ){
-				typeof callback == 'function' && callback.call($('.message ul'), msg);
-			}else{
-				pushError(msg.message);
-			}
-			$('#cmd').val('');
-			doing = false;
-		}, 'json');
-	}
-	
-	function sendCMD(value, callback){
-		post({ cmd: value }, function(msg){
-			console.log(msg)
-			if ( msg.chunks && msg.chunks.length > 0 ){
-				for ( var i = 0 ; i < msg.chunks.length ; i++ ){
-					this.append('<li>' + msg.chunks[i] + '</li>');
-				}
-			}
-			
-			typeof callback == 'function' && callback();
+			})
 		});
 	}
 	
-	function remote(url, data, callback){
-		$.ajax({
-			url: web + '/spm/' + url,
-			dataType: 'jsonp',
-			data: data || {},
-			jsonp: jsonp,
-			success: callback,
-			error: function(){
-				pushError('remote server callback error.');
-			}
+	init.require = function(deps){
+		if ( !_.isArray(deps) ){
+			deps = [deps];
+		}
+		
+		return new Promise(function(resolve){
+			require(deps, function(){
+				var args = slice.call(arguments, 0);
+				if ( args.length == 0 ){
+					args = null;
+				}else if ( args.length === 1 ){
+					args = args[0];
+				}
+				resolve(args);
+			});
+		});
+	}
+	
+	init.post = function(data){
+		return new Promise(function(resolve, reject){
+			$.ajax({
+				url: '/spm/cmd',
+				data: data,
+				type: 'post',
+				dataType: 'json',
+				timeout: 3 * 60 * 1000,
+				success: function(msg){
+					if ( msg.error === 0 ){ resolve(msg); }
+					else{ reject(msg); }
+				},
+				error: function(XMLHttpRequest, textStatus, errorThrown){
+					try{ XMLHttpRequest.abort(); }catch(e){}
+					reject({ message: 'request catch error: ' + textStatus });
+				}
+			});
 		})
 	}
 	
-	function downing(element){
+	init.delay = function(element){
+		var loading, percent, li;
+		
+		if ( !element ){
+			loading = document.createElement('span');
+			percent = document.createElement('span');
+			li = document.createElement('li');
+			$('.message ul').append(li);
+			$(li).append(loading);
+			$(li).append(percent);
+		}else{
+			element = $(element);
+			var spans = element.find('span');
+			loading = spans.get(0);
+			percent = spans.get(1);
+			li = element.get(0);
+		}
+		
 		var roll = function(i){
 			if ( i > 5 ){ i = 0 ; };
 			var d = '.';
 			for ( var j = 0 ; j < i; j++ ){
 				d += '.';
 			}
-			element.timer = $(element).html('<font color="#FC6">- loading ' + d + '</font>');
-			element.timer = setTimeout(function(){
+			li.timer = $(loading).html('<font color="#FC6">- $ loading ' + d + '</font>');
+			li.timer = setTimeout(function(){
 				roll(i + 1);
 			}, 1000);
 		}
-		element.stop = function(){
+		
+		li.stop = function(){
 			try{
-				clearTimeout(element.timer);
+				clearTimeout(li.timer);
 				setTimeout(function(){
-					$(element).parent().animate({opacity: 0}, 'slow', function(){
+					$(li).animate({opacity: 0}, 'slow', function(){
 						$(this).remove();
 					});
-				}, 1000);
+				}, 0);
 			}catch(e){}
 		}
+		
 		roll(0);
+		
+		return [li, loading, percent];
 	}
 	
-	var command = {};
-	command.install = function(name){
-		pushLine('- <font color="green"># getting package message from ' + web + '/spm/get/' + name + '</font>');
-		remote('get/' + name, {}, function(msg){
-			if ( msg.error === 0 ){
-				var data = msg.data;
-				pushLine('<pre>- ' + name + ' package message:</pre>');
-				pushLine('<pre>    <font color="#555">* version: ' + data.version + '</font></pre>');
-				pushLine('<pre>    <font color="#555">* homepage: ' + data.homepage + '</font></pre>');
-				pushLine('<pre>    <font color="#555">* zip: ' + data.zip + '</font></pre>');
-				
-				if ( data.author ){
-					pushLine('<pre>    <font color="#555">* author: ' + data.author.name + '</font></pre>');
-					pushLine('<pre>    <font color="#555">* email: ' + data.author.email + '</font></pre>');
-					pushLine('<pre>    <font color="#555">* url: ' + data.author.url + '</font></pre>');
+	init.send = function(cmd, element){
+		return init.post({ cmd: cmd }).then(function(msg){
+			if ( msg.chunks && msg.chunks.length > 0 ){
+				for ( var i = 0 ; i < msg.chunks.length ; i++ ){
+					pushLine(msg.chunks[i]);
 				}
-				
-				pushLine('- <font color="green"># downloading package from ' + data.zip + '</font>');
-				var loading = document.createElement('span');
-				var li = document.createElement('li');
-				$('.message ul').append(li);
-				$(li).append(loading);
-				downing(loading);
-				
-				sendCMD('spm download ' + data.zip + ' ' + name, function(){
-					loading.stop();
-					pushLine('- <font color="#069">@ package module [' + name + '] download complete.</font>');
-				});
-			}else{
-				pushError(msg.message);
+				scrolltop();
 			}
+			return msg;
+		})['catch'](function(msg){
+			pushError(msg.message);
+			return msg;
 		});
 	}
 	
-	command.compress = function(source, target){
-		sendCMD('spm compress ' + source + ' ' + target, function(){
-			pushLine('- <font color="#069"># compress success!</font>');
-		});
+	init.resize = scrolltop;
+	init.pushError = pushError;
+	init.pushSuccess = pushLine;
+	init.web = web;
+	init.jsonp = jsonp;
+	
+	init.main = function(value){ 
+		if ( value.length > 0 ){
+			value = value.replace(/\s+/g, ' ').split(' ');
+			
+			var spm = value[0]
+				,	method = value[1]
+				,	args = [];
+				
+			if ( value.length > 2 ) args = value.slice(2) || [];
+			
+			pushLine('<font color="#FC6">- &gt; ' + value.join(' ') + '</font>');
+			$('#cmd').val('');
+			
+			return new Promise(function(resolve, reject){
+				if ( window.spmDeps[spm] ){
+					init.require(window.spmDeps[spm]).then(function(modal){
+						if ( modal[method] ){
+							modal[method].apply(init, args).then(resolve)['catch'](reject);
+						}else{
+							init.send(value.join(' ')).then(resolve)['catch'](reject);
+						}
+					})['catch'](function(e){
+						pushError('cmd ui [' + spm + '] required, but it missed.');
+					});
+				}else{
+					init.send(value.join(' ')).then(resolve)['catch'](reject);
+				}
+			});
+		}else{
+			return Promise.reject({ error: 1, message: 'no command required.' });
+		}
 	}
 	
-}).call(this);
+	function pushError(msg){ $('.message ul').append('<li class="error"><span>&gt; @ ERROR: </span>' + msg + '</li>'); }
+	function pushLine(msg){ $('.message ul').append('<li>' + msg + '</li>'); }
+	function scrolltop(){ $('body').scrollTop($('body').outerHeight()); }
+	
+	
+	return init;
+});
