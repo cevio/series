@@ -62,7 +62,7 @@
 	PROCESS.define('browser', false);
 	PROCESS.define('env', envs);
 	PROCESS.define('argv', []);
-	PROCESS.define('version', '1.0.0');
+	PROCESS.define('version', '1.1.357');
 	PROCESS.define('platform', 'win32');
 	PROCESS.define('modules', {});
 	PROCESS.define('bags', 'series_modules');

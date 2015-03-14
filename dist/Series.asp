@@ -1,11 +1,11 @@
 <%@LANGUAGE="JAVASCRIPT" CODEPAGE="65001"%>
 <%
 /*
- * @overview Global TronJS Scripts Loader - a tiny implementation of Promises/A+ and CommonJS contributors.
- * @copyright Copyright (c) 2014 evio studio and PJBlog5 project
+ * @overview Global series Scripts Loader - a tiny implementation of Promises/A+ and CommonJS contributors.
+ * @copyright Copyright (c) 2014 evio studio and series iis node
  * @license   Licensed under MIT license
- *            See https://github.com/cevio/tronjs.js
- * @version   6.1.223
+ *            See https://github.com/cevio/series
+ * @version   1.1.348
  */
 Response.Buffer = true;
 Server.ScriptTimeOut = 999;
@@ -13,38 +13,45 @@ Session.CodePage = 65001;
 Session.LCID = 2052;
 Response.Charset = 'utf-8';
 
-if ( !Array.prototype.indexOf ){
-	Array.prototype.indexOf = function( value ){
-		var j = -1;
-		for ( var i = 0 ; i < this.length ; i++ ){
-			if ( value === this[i] ){
-				j = i;
-				break;
-			}
-		}
-		return j;
-	};
-	Array.prototype.lastIndexOf = function( value ){
-		var j = -1;
-		for ( var i = this.length - 1 ; i > -1 ; i-- ){
-			if ( value === this[i] ){
-				j = i;
-				break;
-			}
-		}
-		return j;
-	};
-};
+if (typeof Array.prototype.indexOf != "function") {
+  Array.prototype.indexOf = function (searchElement, fromIndex) {
+    var index = -1;
+    fromIndex = fromIndex * 1 || 0;
 
-if ( !Array.prototype.forEach ){
-	Array.prototype.forEach = function( callback, context ){
-		for ( var i = 0 ; i < this.length ; i++ ){
-			if ( typeof callback === "function" ){
-				callback.call(context || this, this[i], i);
-			}
-		}
-	};
-};
+    for (var k = 0, length = this.length; k < length; k++) {
+      if (k >= fromIndex && this[k] === searchElement) {
+          index = k;
+          break;
+      }
+    }
+    return index;
+  };
+}
+
+if (typeof Array.prototype.lastIndexOf != "function") {
+  Array.prototype.lastIndexOf = function (searchElement, fromIndex) {
+    var index = -1, length = this.length;
+    fromIndex = fromIndex * 1 || length - 1;
+
+    for (var k = length - 1; k > -1; k-=1) {
+        if (k <= fromIndex && this[k] === searchElement) {
+            index = k;
+            break;
+        }
+    }
+    return index;
+  };
+}
+
+if (typeof Array.prototype.forEach != "function") {
+  Array.prototype.forEach = function (fn, context) {
+    for (var k = 0, length = this.length; k < length; k++) {
+      if (typeof fn === "function" && Object.prototype.hasOwnProperty.call(this, k)) {
+        fn.call(context, this[k], k, this);
+      }
+    }
+  };
+}
 
 if (!Array.prototype.filter) {
   Array.prototype.filter = function(fun/*, thisArg*/) {
@@ -93,6 +100,59 @@ if ( !String.prototype.trim ){
 		return header;
 	}
 };
+
+if (typeof Array.prototype.map != "function") {
+  Array.prototype.map = function (fn, context) {
+    var arr = [];
+    if (typeof fn === "function") {
+      for (var k = 0, length = this.length; k < length; k++) {      
+         arr.push(fn.call(context, this[k], k, this));
+      }
+    }
+    return arr;
+  };
+}
+
+if (typeof Array.prototype.some != "function") {
+  Array.prototype.some = function (fn, context) {
+	var passed = false;
+	if (typeof fn === "function") {
+   	  for (var k = 0, length = this.length; k < length; k++) {
+		  if (passed === true) break;
+		  passed = !!fn.call(context, this[k], k, this);
+	  }
+    }
+	return passed;
+  };
+}
+if (typeof Array.prototype.every != "function") {
+  Array.prototype.every = function (fn, context) {
+    var passed = true;
+    if (typeof fn === "function") {
+       for (var k = 0, length = this.length; k < length; k++) {
+          if (passed === false) break;
+          passed = !!fn.call(context, this[k], k, this);
+      }
+    }
+    return passed;
+  };
+}
+if (typeof Array.prototype.reduce != "function") {
+  Array.prototype.reduce = function (callback, initialValue ) {
+     var previous = initialValue, k = 0, length = this.length;
+     if (typeof initialValue === "undefined") {
+        previous = this[0];
+        k = 1;
+     }
+     
+    if (typeof callback === "function") {
+      for (k; k < length; k++) {
+         this.hasOwnProperty(k) && (previous = callback(previous, this[k], k, this));
+      }
+    }
+    return previous;
+  };
+}
 
 if ( !Function.prototype.bind ) { 
 	Function.prototype.bind = function (oThis) { 
@@ -150,9 +210,9 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
 
 
 // Grunt From /src/underscore.js
-//     Underscore.js 1.7.0
+//     Underscore.js 1.8.2
 //     http://underscorejs.org
-//     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Underscore may be freely distributed under the MIT license.
 
 (function() {
@@ -184,7 +244,7 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
     nativeBind         = FuncProto.bind,
     nativeCreate       = Object.create;
 
-  // Reusable constructor function for prototype setting.
+  // Naked function reference for surrogate-prototype-swapping.
   var Ctor = function(){};
 
   // Create a safe reference to the Underscore object for use below.
@@ -207,7 +267,7 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   }
 
   // Current version.
-  _.VERSION = '1.7.0';
+  _.VERSION = '1.8.2';
 
   // Internal function that returns an efficient (for current engines) version
   // of the passed-in callback, to be repeatedly applied in other Underscore
@@ -239,7 +299,7 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   var cb = function(value, context, argCount) {
     if (value == null) return _.identity;
     if (_.isFunction(value)) return optimizeCb(value, context, argCount);
-    if (_.isObject(value)) return _.matches(value);
+    if (_.isObject(value)) return _.matcher(value);
     return _.property(value);
   };
   _.iteratee = function(value, context) {
@@ -279,7 +339,7 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // Related: http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
   var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
   var isArrayLike = function(collection) {
-    var length = collection && collection.length;
+    var length = collection != null && collection.length;
     return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
   };
 
@@ -290,11 +350,10 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // Handles raw objects in addition to array-likes. Treats all
   // sparse array-likes as if they were dense.
   _.each = _.forEach = function(obj, iteratee, context) {
-    if (obj == null) return obj;
     iteratee = optimizeCb(iteratee, context);
-    var i, length = obj.length;
+    var i, length;
     if (isArrayLike(obj)) {
-      for (i = 0; i < length; i++) {
+      for (i = 0, length = obj.length; i < length; i++) {
         iteratee(obj[i], i, obj);
       }
     } else {
@@ -308,14 +367,12 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
 
   // Return the results of applying the iteratee to each element.
   _.map = _.collect = function(obj, iteratee, context) {
-    if (obj == null) return [];
     iteratee = cb(iteratee, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
         length = (keys || obj).length,
-        results = Array(length),
-        currentKey;
+        results = Array(length);
     for (var index = 0; index < length; index++) {
-      currentKey = keys ? keys[index] : index;
+      var currentKey = keys ? keys[index] : index;
       results[index] = iteratee(obj[currentKey], currentKey, obj);
     }
     return results;
@@ -334,7 +391,6 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
     }
 
     return function(obj, iteratee, memo, context) {
-      if (obj == null) return memo;
       iteratee = optimizeCb(iteratee, context, 4);
       var keys = !isArrayLike(obj) && _.keys(obj),
           length = (keys || obj).length,
@@ -355,31 +411,6 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // The right-associative version of reduce, also known as `foldr`.
   _.reduceRight = _.foldr = createReduce(-1);
 
-  // **Transform** is an alternative to reduce that transforms `obj` to a new
-  // `accumulator` object.
-  _.transform = function(obj, iteratee, accumulator, context) {
-    if (accumulator == null) {
-      if (_.isArray(obj)) {
-        accumulator = [];
-      } else if (_.isObject(obj)) {
-        var Ctor = obj.constructor;
-        accumulator = baseCreate(typeof Ctor == 'function' && Ctor.prototype);
-      } else {
-        accumulator = {};
-      }
-    }
-    if (obj == null) return accumulator;
-    iteratee = optimizeCb(iteratee, context, 4);
-    var keys = obj.length !== +obj.length && _.keys(obj),
-      length = (keys || obj).length,
-      index, currentKey;
-    for (index = 0; index < length; index++) {
-      currentKey = keys ? keys[index] : index;
-      if (iteratee(accumulator, obj[currentKey], currentKey, obj) === false) break;
-    }
-    return accumulator;
-  };
-
   // Return the first value which passes a truth test. Aliased as `detect`.
   _.find = _.detect = function(obj, predicate, context) {
     var key;
@@ -395,7 +426,6 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // Aliased as `select`.
   _.filter = _.select = function(obj, predicate, context) {
     var results = [];
-    if (obj == null) return results;
     predicate = cb(predicate, context);
     _.each(obj, function(value, index, list) {
       if (predicate(value, index, list)) results.push(value);
@@ -411,13 +441,11 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // Determine whether all of the elements match a truth test.
   // Aliased as `all`.
   _.every = _.all = function(obj, predicate, context) {
-    if (obj == null) return true;
     predicate = cb(predicate, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
-        length = (keys || obj).length,
-        index, currentKey;
-    for (index = 0; index < length; index++) {
-      currentKey = keys ? keys[index] : index;
+        length = (keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
       if (!predicate(obj[currentKey], currentKey, obj)) return false;
     }
     return true;
@@ -426,24 +454,22 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // Determine if at least one element in the object matches a truth test.
   // Aliased as `any`.
   _.some = _.any = function(obj, predicate, context) {
-    if (obj == null) return false;
     predicate = cb(predicate, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
-        length = (keys || obj).length,
-        index, currentKey;
-    for (index = 0; index < length; index++) {
-      currentKey = keys ? keys[index] : index;
+        length = (keys || obj).length;
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys ? keys[index] : index;
       if (predicate(obj[currentKey], currentKey, obj)) return true;
     }
     return false;
   };
 
-  // Determine if the array or object contains a given value (using `===`).
+  // Determine if the array or object contains a given item (using `===`).
   // Aliased as `includes` and `include`.
-  _.contains = _.includes = _.include = function(obj, target, fromIndex) {
-    if (obj == null) return false;
+  _.contains = _.includes = _.include = function(obj, item, fromIndex, guard) {
     if (!isArrayLike(obj)) obj = _.values(obj);
-    return _.indexOf(obj, target, typeof fromIndex == 'number' && fromIndex) >= 0;
+    if (typeof fromIndex != 'number' || guard) fromIndex = 0;
+    return _.indexOf(obj, item, fromIndex) >= 0;
   };
 
   // Invoke a method (with arguments) on every item in a collection.
@@ -464,13 +490,13 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // Convenience version of a common use case of `filter`: selecting only objects
   // containing specific `key:value` pairs.
   _.where = function(obj, attrs) {
-    return _.filter(obj, _.matches(attrs));
+    return _.filter(obj, _.matcher(attrs));
   };
 
   // Convenience version of a common use case of `find`: getting the first object
   // containing specific `key:value` pairs.
   _.findWhere = function(obj, attrs) {
-    return _.find(obj, _.matches(attrs));
+    return _.find(obj, _.matcher(attrs));
   };
 
   // Return the maximum element (or element-based computation).
@@ -639,14 +665,13 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
 
   // Returns everything but the last entry of the array. Especially useful on
   // the arguments object. Passing **n** will return all the values in
-  // the array, excluding the last N. The **guard** check allows it to work with
-  // `_.map`.
+  // the array, excluding the last N.
   _.initial = function(array, n, guard) {
     return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
   };
 
   // Get the last element of an array. Passing **n** will return the last N
-  // values in the array. The **guard** check allows it to work with `_.map`.
+  // values in the array.
   _.last = function(array, n, guard) {
     if (array == null) return void 0;
     if (n == null || guard) return array[array.length - 1];
@@ -655,8 +680,7 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
 
   // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
   // Especially useful on the arguments object. Passing an **n** will return
-  // the rest N values in the array. The **guard**
-  // check allows it to work with `_.map`.
+  // the rest N values in the array.
   _.rest = _.tail = _.drop = function(array, n, guard) {
     return slice.call(array, n == null || guard ? 1 : n);
   };
@@ -668,9 +692,9 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
 
   // Internal implementation of a recursive `flatten` function.
   var flatten = function(input, shallow, strict, startIndex) {
-    var output = [], idx = 0, value;
+    var output = [], idx = 0;
     for (var i = startIndex || 0, length = input && input.length; i < length; i++) {
-      value = input[i];
+      var value = input[i];
       if (isArrayLike(value) && (_.isArray(value) || _.isArguments(value))) {
         //flatten current level of array or arguments object
         if (!shallow) value = flatten(value, shallow, strict);
@@ -781,9 +805,8 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // pairs, or two parallel arrays of the same length -- one of keys, and one of
   // the corresponding values.
   _.object = function(list, values) {
-    if (list == null) return {};
     var result = {};
-    for (var i = 0, length = list.length; i < length; i++) {
+    for (var i = 0, length = list && list.length; i < length; i++) {
       if (values) {
         result[list[i]] = values[i];
       } else {
@@ -806,7 +829,8 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
       return array[i] === item ? i : -1;
     }
     if (item !== item) {
-      return _.findIndex(slice.call(array, i), _.isNaN);
+      var index = _.findIndex(slice.call(array, i), _.isNaN);
+      return index >= 0 ? index + i : -1;
     }
     for (; i < length; i++) if (array[i] === item) return i;
     return -1;
@@ -859,7 +883,7 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // the native Python `range()` function. See
   // [the Python documentation](http://docs.python.org/library/functions.html#range).
   _.range = function(start, stop, step) {
-    if (arguments.length <= 1) {
+    if (stop == null) {
       stop = start || 0;
       start = 0;
     }
@@ -895,9 +919,10 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
     if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
     if (!_.isFunction(func)) throw new TypeError('Bind must be called on a function');
     var args = slice.call(arguments, 2);
-    return function bound() {
+    var bound = function() {
       return executeBound(func, bound, context, this, args.concat(slice.call(arguments)));
     };
+    return bound;
   };
 
   // Partially apply a function by creating a version that has had some of its
@@ -905,7 +930,7 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // as a placeholder, allowing any combination of arguments to be pre-filled.
   _.partial = function(func) {
     var boundArgs = slice.call(arguments, 1);
-    return function bound() {
+    var bound = function() {
       var position = 0, length = boundArgs.length;
       var args = Array(length);
       for (var i = 0; i < length; i++) {
@@ -914,6 +939,7 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
       while (position < arguments.length) args.push(arguments[position++]);
       return executeBound(func, bound, this, this, args);
     };
+    return bound;
   };
 
   // Bind a number of an object's methods to that object. Remaining arguments
@@ -1083,18 +1109,22 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   // ----------------
 
   // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
-  var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString') && typeof window != 'undefined';
-  var nonEnumerableProps = ['constructor', 'valueOf', 'isPrototypeOf', 'toString',
+  var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString');
+  var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
                       'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
 
   function collectNonEnumProps(obj, keys) {
     var nonEnumIdx = nonEnumerableProps.length;
-    var proto = typeof obj.constructor === 'function' ? FuncProto : ObjProto;
+    var constructor = obj.constructor;
+    var proto = (_.isFunction(constructor) && constructor.prototype) || ObjProto;
+
+    // Constructor is a special case.
+    var prop = 'constructor';
+    if (_.has(obj, prop) && !_.contains(keys, prop)) keys.push(prop);
 
     while (nonEnumIdx--) {
-      var prop = nonEnumerableProps[nonEnumIdx];
-      if (prop === 'constructor' ? _.has(obj, prop) : prop in obj &&
-        obj[prop] !== proto[prop] && !_.contains(keys, prop)) {
+      prop = nonEnumerableProps[nonEnumIdx];
+      if (prop in obj && obj[prop] !== proto[prop] && !_.contains(keys, prop)) {
         keys.push(prop);
       }
     }
@@ -1113,7 +1143,7 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   };
 
   // Retrieve all the property names of an object.
-  _.keysIn = function(obj) {
+  _.allKeys = function(obj) {
     if (!_.isObject(obj)) return [];
     var keys = [];
     for (var key in obj) keys.push(key);
@@ -1131,6 +1161,21 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
       values[i] = obj[keys[i]];
     }
     return values;
+  };
+
+  // Returns the results of applying the iteratee to each element of the object
+  // In contrast to _.map it returns an object
+  _.mapObject = function(obj, iteratee, context) {
+    iteratee = cb(iteratee, context);
+    var keys =  _.keys(obj),
+          length = keys.length,
+          results = {},
+          currentKey;
+      for (var index = 0; index < length; index++) {
+        currentKey = keys[index];
+        results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
+      }
+      return results;
   };
 
   // Convert an object into a list of `[key, value]` pairs.
@@ -1165,11 +1210,11 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   };
 
   // Extend a given object with all the properties in passed-in object(s).
-  _.extend = createAssigner(_.keysIn);
+  _.extend = createAssigner(_.allKeys);
 
   // Assigns a given object with all the own properties in the passed-in object(s)
   // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
-  _.assign = createAssigner(_.keys);
+  _.extendOwn = _.assign = createAssigner(_.keys);
 
   // Returns the first key on an object that passes a predicate test
   _.findKey = function(obj, predicate, context) {
@@ -1182,22 +1227,21 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   };
 
   // Return a copy of the object only containing the whitelisted properties.
-  _.pick = function(obj, iteratee, context) {
-    var result = {}, key;
+  _.pick = function(object, oiteratee, context) {
+    var result = {}, obj = object, iteratee, keys;
     if (obj == null) return result;
-    if (_.isFunction(iteratee)) {
-      iteratee = optimizeCb(iteratee, context);
-      for (key in obj) {
-        var value = obj[key];
-        if (iteratee(value, key, obj)) result[key] = value;
-      }
+    if (_.isFunction(oiteratee)) {
+      keys = _.allKeys(obj);
+      iteratee = optimizeCb(oiteratee, context);
     } else {
-      var keys = flatten(arguments, false, false, 1);
-      obj = new Object(obj);
-      for (var i = 0, length = keys.length; i < length; i++) {
-        key = keys[i];
-        if (key in obj) result[key] = obj[key];
-      }
+      keys = flatten(arguments, false, false, 1);
+      iteratee = function(value, key, obj) { return key in obj; };
+      obj = Object(obj);
+    }
+    for (var i = 0, length = keys.length; i < length; i++) {
+      var key = keys[i];
+      var value = obj[key];
+      if (iteratee(value, key, obj)) result[key] = value;
     }
     return result;
   };
@@ -1216,14 +1260,14 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
   };
 
   // Fill in a given object with default properties.
-  _.defaults = createAssigner(_.keysIn, true);
+  _.defaults = createAssigner(_.allKeys, true);
 
   // Creates an object that inherits from the given prototype object.
   // If additional properties are provided then they will be added to the
   // created object.
   _.create = function(prototype, props) {
     var result = baseCreate(prototype);
-    if (props) _.assign(result, props);
+    if (props) _.extendOwn(result, props);
     return result;
   };
 
@@ -1240,6 +1284,19 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
     interceptor(obj);
     return obj;
   };
+
+  // Returns whether an object has a given set of `key:value` pairs.
+  _.isMatch = function(object, attrs) {
+    var keys = _.keys(attrs), length = keys.length;
+    if (object == null) return !length;
+    var obj = Object(object);
+    for (var i = 0; i < length; i++) {
+      var key = keys[i];
+      if (attrs[key] !== obj[key] || !(key in obj)) return false;
+    }
+    return true;
+  };
+
 
   // Internal recursive comparison function for `isEqual`.
   var eq = function(a, b, aStack, bStack) {
@@ -1379,8 +1436,8 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
     };
   }
 
-  // Optimize `isFunction` if appropriate. Work around an IE 11 bug (#1621).
-  // Work around a Safari 8 bug (#1929)
+  // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
+  // IE 11 (#1621), and in Safari 8 (#1929).
   if (typeof /./ != 'function' && typeof Int8Array != 'object') {
     _.isFunction = function(obj) {
       return typeof obj == 'function' || false;
@@ -1448,24 +1505,19 @@ if ( typeof JSON === 'undefined' ){ var JSON = new Object(); };
     };
   };
 
-  // Generates a function for a given object that returns a given property (including those of ancestors)
+  // Generates a function for a given object that returns a given property.
   _.propertyOf = function(obj) {
     return obj == null ? function(){} : function(key) {
       return obj[key];
     };
   };
 
-  // Returns a predicate for checking whether an object has a given set of `key:value` pairs.
-  _.matches = function(attrs) {
-    var pairs = _.pairs(attrs), length = pairs.length;
+  // Returns a predicate for checking whether an object has a given set of 
+  // `key:value` pairs.
+  _.matcher = _.matches = function(attrs) {
+    attrs = _.extendOwn({}, attrs);
     return function(obj) {
-      if (obj == null) return !length;
-      obj = new Object(obj);
-      for (var i = 0; i < length; i++) {
-        var pair = pairs[i], key = pair[0];
-        if (pair[1] !== obj[key] || !(key in obj)) return false;
-      }
-      return true;
+      return _.isMatch(obj, attrs);
     };
   };
 
@@ -5572,7 +5624,7 @@ if ( typeof setTimeout === 'undefined' ){
 	PROCESS.define('browser', false);
 	PROCESS.define('env', envs);
 	PROCESS.define('argv', []);
-	PROCESS.define('version', '1.0.0');
+	PROCESS.define('version', '1.1.348');
 	PROCESS.define('platform', 'win32');
 	PROCESS.define('modules', {});
 	PROCESS.define('bags', 'series_modules');
@@ -6179,9 +6231,7 @@ if (isWindows) {
 	};
 	
 	fs.mkdir = function( path ){
-		if ( !object.FolderExists(path) ) { 
-			object.CreateFolder(path); 
-		};
+		autoCreate(path, false);
 		
 		return object.FolderExists(path);
 	};
@@ -6228,6 +6278,7 @@ if (isWindows) {
 					stream.Write(bs);  
 					stream.SetEOS();
 				}
+				autoCreate(filename, true);
 				stream.SaveToFile(filename, 2);
 				stream.Close();
 		}catch(e){
@@ -6323,6 +6374,7 @@ if (isWindows) {
 				stream.Open();
 				stream.Write(buffer);
 				stream.Position = 0;
+				autoCreate(fd, true);
 				stream.SaveToFile(fd, 2);
 				stream.Close();
 		}catch(e){
@@ -6385,6 +6437,19 @@ if (isWindows) {
 			object.DeleteFile(path);
 		}
 	};
+	
+	function autoCreate(file, isFile){
+		var root = path.server('/');
+		var folder = isFile ? path.dirname(file) : file;
+		var relatives = path.relative(root, folder).replace(/\\/g, '/').split('/');
+		_.each(relatives, function(fo){
+			root = path.resolve(root, fo);
+			if ( !object.FolderExists(root) ) { 
+				object.CreateFolder(root); 
+			};
+		});
+		return file;
+	}
 	
 }).call(fs, Global);
 
@@ -6539,17 +6604,26 @@ if (isWindows) {
 		get: function(dirname, selector){
 			selector = selector.replace(/\\/g, '/');
 			if ( /^\.\//.test(selector) || /^\.\.\//.test(selector) || /\//.test(selector) ){
-				return this.lazy(path.resolve(dirname, selector));
+				var a = path.resolve(dirname, selector);
+				var b = this.ext(a);
+				if ( a != b ){
+					return b;
+				}else{
+					return this.lazy(a);
+				}
 			}else{
 				var cwd = Server.MapPath(process.cwd());
 				var that = this;
 				var findPatherBags = function(dir, sec){
 					var isRoot = path.relative(dir, cwd).length === 0,
 						realPath = path.resolve(dir, process.bags, sec),
+						pather = path.resolve(dir, sec),
+						_pather = that.ext(pather),
 						matcher;
 
-					if ( that.FolderExist(realPath) && !!( matcher = that.match(realPath) ) ){ return matcher; }					
-					else if ( isRoot ){ return path.resolve(dirname, sec); }
+					if ( that.FolderExist(realPath) && !!( matcher = that.match(realPath) ) ){ return matcher; }
+					else if ( pather != _pather ){ return _pather; }	
+					else if ( isRoot ){ return that.ext(path.resolve(dirname, sec)); }
 					else{ return findPatherBags(path.resolve(dir, '..'), sec); };
 				};
 				return this.lazy(findPatherBags(dirname, selector));
@@ -6560,15 +6634,30 @@ if (isWindows) {
 			var packPather = path.resolve(pather, 'package.json');
 
 			if ( this.FileExist(packPather) ){
-				try{
 					var PackageData = JSON.parse(fs.readFile(packPather));
 					if ( PackageData.main && PackageData.main.length > 0 ){ 
 						packPather = path.resolve(pather, PackageData.main); 
 					}else{ 
 						packPather = path.resolve(pather, 'index.js'); 
 					};
-					if ( this.FileExist(packPather) ) return packPather; 
-				}catch(e){}
+					
+					var _pp = packPather;
+					if (  !/\.js$/i.test(packPather) ){
+						_pp = _pp + '.js';
+					}
+					
+					if ( this.FileExist(packPather) ) { 
+						return packPather; 
+					}
+					else if ( this.FileExist(_pp) ){
+						return _pp;
+					}
+					else if ( this.FolderExist(packPather) ){
+						var zindex = path.resolve(packPather, 'index.js');
+						if ( this.FileExist(zindex) ){
+							return zindex;
+						}
+					}
 			}else{
 				packPather = path.resolve(pather, 'index.js');
 				if ( this.FileExist(packPather) ) return packPather; 
@@ -6577,8 +6666,26 @@ if (isWindows) {
 		
 		lazy: function(pather){
 			if ( !this.FileExist(pather) && this.FolderExist(pather) ){
-				pather = path.resolve(pather, 'index.js');
+				var matches = this.match(pather);
+				if ( matches ){
+					return matches;
+				}
 			};
+			return pather;
+		},
+		
+		ext: function(pather){
+			if ( this.FileExist(pather) ){
+				return pather;
+			}
+			
+			if ( !/\.js$/i.test(pather) ){
+				var pathers = pather + '.js';
+				if ( this.FileExist(pathers) ){
+					return pathers;
+				}
+			}
+			
 			return pather;
 		}
 	}
@@ -6590,12 +6697,22 @@ if (isWindows) {
 ;(function(){
 	var ROOT = this;
 	
+	var systems = {
+		fs: fs,
+		path: path,
+		underscore: _,
+		promise: Promise
+	}
+	
 	ROOT.Module = function(dirname){
 		this.dirname = dirname;
 		this.exports = null;
 	};
 	
 	ROOT.Module.prototype.require = function(anothers){
+		if ( systems[anothers] ){
+			return systems[anothers];
+		}
 		return (new ROOT.Require(this.resolve(anothers))).main.exports;
 	};
 	

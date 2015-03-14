@@ -162,16 +162,20 @@
 	
 	init.main = function(value){ 
 		if ( value.length > 0 ){
-			value = value.replace(/\s+/g, ' ').split(' ');
+			var keys = value + '';
 			
+			pushLine('<font color="#FC6"><pre>- &gt; ' + keys + '</pre></font>');
+			$('#cmd').val('');
+			
+			value = formatCmd(value);
+
 			var spm = value[0]
 				,	method = value[1]
 				,	args = [];
 				
 			if ( value.length > 2 ) args = value.slice(2) || [];
 			
-			pushLine('<font color="#FC6">- &gt; ' + value.join(' ') + '</font>');
-			$('#cmd').val('');
+			args.push(keys);
 			
 			return new Promise(function(resolve, reject){
 				if ( window.spmDeps[spm] ){
@@ -179,13 +183,13 @@
 						if ( modal[method] ){
 							modal[method].apply(init, args).then(resolve)['catch'](reject);
 						}else{
-							init.send(value.join(' ')).then(resolve)['catch'](reject);
+							init.send(keys).then(resolve)['catch'](reject);
 						}
 					})['catch'](function(e){
-						pushError('cmd ui [' + spm + '] required, but it missed.');
+						pushError('cmd ui [' + spm + '] required, but it missed[' + e.message + '].');
 					});
 				}else{
-					init.send(value.join(' ')).then(resolve)['catch'](reject);
+					init.send(keys).then(resolve)['catch'](reject);
 				}
 			});
 		}else{
@@ -197,6 +201,16 @@
 	function pushLine(msg){ $('.message ul').append('<li>' + msg + '</li>'); }
 	function scrolltop(){ $('body').scrollTop($('body').outerHeight()); }
 	
+	function formatCmd(str){
+		var args = str.match( /"((\\")|[^"])+"|\s([^"\s]+)(?=\s)|^[^"]+?(?=\s)|\s[^"]+?$/g );
+		
+		for ( var i = 0; i < args.length ; i++ ) {
+			args[i] = args[i].replace(/(^\s|^\"|\"$)/g, '');
+			args[i] = args[i].replace(/\\"/g, '"');
+		}
+		
+		return args;
+	}
 	
 	return init;
 });

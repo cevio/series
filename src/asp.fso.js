@@ -32,9 +32,7 @@
 	};
 	
 	fs.mkdir = function( path ){
-		if ( !object.FolderExists(path) ) { 
-			object.CreateFolder(path); 
-		};
+		autoCreate(path, false);
 		
 		return object.FolderExists(path);
 	};
@@ -81,6 +79,7 @@
 					stream.Write(bs);  
 					stream.SetEOS();
 				}
+				autoCreate(filename, true);
 				stream.SaveToFile(filename, 2);
 				stream.Close();
 		}catch(e){
@@ -176,6 +175,7 @@
 				stream.Open();
 				stream.Write(buffer);
 				stream.Position = 0;
+				autoCreate(fd, true);
 				stream.SaveToFile(fd, 2);
 				stream.Close();
 		}catch(e){
@@ -238,5 +238,18 @@
 			object.DeleteFile(path);
 		}
 	};
+	
+	function autoCreate(file, isFile){
+		var root = path.server('/');
+		var folder = isFile ? path.dirname(file) : file;
+		var relatives = path.relative(root, folder).replace(/\\/g, '/').split('/');
+		_.each(relatives, function(fo){
+			root = path.resolve(root, fo);
+			if ( !object.FolderExists(root) ) { 
+				object.CreateFolder(root); 
+			};
+		});
+		return file;
+	}
 	
 }).call(fs, Global);

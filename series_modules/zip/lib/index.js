@@ -41,7 +41,7 @@ function ZIP(folder, file){
 	});
 	
 	// 保存zip文件
-	var content = zip.generate({type:"base64"});
+	var content = zip.generate({compression:'DEFLATE',type:"base64"});
 	fs.writeFile(file, base64OrBin(content));
 }
 
