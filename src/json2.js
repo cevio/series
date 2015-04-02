@@ -325,13 +325,21 @@
 			return new Array(count + 1).join(s);
 		}
 		
-		JSON.format = function(json, cr) {
+		/**
+			options.cr: 
+				true: 使用\r\n(windows风格)作为换行符
+				false：使用\n(*nux风格)作为换行符，缺省
+			options.tab:
+				缩进符，默认为tab
+		*/
+		JSON.format = function(json, options) {
 
 			json = this.stringify(json);
 			
 			var i           = 0,
 				il          = 0,
-				tab         = '\t',
+				cr			= options && options.cr ? options.cr : false,
+				tab         = options && options.tab ? options.tab : '\t',
 				output   	= '',
 				indentLevel = 0,
 				inString    = false,

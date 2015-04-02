@@ -32,6 +32,7 @@
 	function init(){
 		$('#cmd').on('keyup', function(event){ if ( event.keyCode === 13 ){ init.main($('#cmd').val()); } });
 		$('#cmd').on('blur', function(){ $(this).focus(); }).focus();
+		init.debug();
 	}
 	
 	init.remote = function(url, data){
@@ -140,6 +141,7 @@
 	}
 	
 	init.send = function(cmd, element){
+		try{ clearTimeout(init.timer); }catch(e){};
 		return init.post({ cmd: cmd }).then(function(msg){
 			if ( msg.chunks && msg.chunks.length > 0 ){
 				for ( var i = 0 ; i < msg.chunks.length ; i++ ){
@@ -147,6 +149,7 @@
 				}
 				scrolltop();
 			}
+			init.timer = setTimeout(init.debug, 3000);
 			return msg;
 		})['catch'](function(msg){
 			pushError(msg.message);
@@ -159,6 +162,8 @@
 	init.pushSuccess = pushLine;
 	init.web = web;
 	init.jsonp = jsonp;
+	
+	init.timer = null;
 	
 	init.main = function(value){ 
 		if ( value.length > 0 ){
@@ -195,6 +200,28 @@
 		}else{
 			return Promise.reject({ error: 1, message: 'no command required.' });
 		}
+	}
+	
+	init.debug = function(){
+		try{ clearTimeout(init.timer); }catch(e){};
+		init.post({ cmd: 'debug run' }).then(function(runs){
+			var msg = runs.runners;
+			if ( msg && msg.length ){
+				_.each(msg, function(m){
+					pushLine('<font color="#069">- % debug: </font>');
+					pushLine('<div style="padding-left: 15px; color:#aaa;"><pre>' + m + '</pre></div>');
+				});
+				scrolltop();
+			}
+			return new Promise(function(resolve, reject){
+				init.timer = setTimeout(function(){
+					resolve();
+					init.debug();
+				}, 3000);
+			});
+		})['catch'](function(msg){
+			pushError(msg.message);
+		});
 	}
 	
 	function pushError(msg){ $('.message ul').append('<li class="error"><span>&gt; @ ERROR: </span>' + msg + '</li>'); }

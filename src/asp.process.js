@@ -6,6 +6,17 @@
 	var 
 		ROOT = this,
 		_ = this._;
+		
+	this.modalMaps = {
+		fs: fs,
+		path: path,
+		underscore: _,
+		promise: Promise,
+		util: this.util,
+		events: this.events,
+		http: this.http,
+		https: this.https
+	};
 	
 	_.enumerate = function( object, callback ){
 		var _object = new Enumerator(object),
@@ -56,49 +67,45 @@
 	
 	envs.SERIES_ENV = 'production';
 	
-	var PROCESS = new Class();
+	var PROCESS = function(){ Global.events.EventEmitter.call(this); };
+	Global.util.inherits(PROCESS, Global.events.EventEmitter);
+	process = new PROCESS();
 	
-	PROCESS.define('title', 'Series Asp Worker');
-	PROCESS.define('browser', false);
-	PROCESS.define('env', envs);
-	PROCESS.define('argv', []);
-	PROCESS.define('version', '1.1.357');
-	PROCESS.define('platform', 'win32');
-	PROCESS.define('modules', {});
-	PROCESS.define('bags', 'series_modules');
-	PROCESS.property('worker', '/');
+	process.title = 'Series Asp Worker';
+	process.browser = false;
+	process.env = envs;
+	process.argv = [];
+	process.version = '1.1.432';
+	process.platform = 'win32';
+	process.modules = {};
+	process.bags = 'series_modules';
+	process.worker = '/';
 	
-	PROCESS.instance(event).extend(event);
-	
-	PROCESS.define('nextTick', function(fun){
+	process.nextTick = function(fun){
 		queue.push(fun);
 		if (!draining) {
 			setTimeout(drainQueue, 0);
 		}
-	});
+	}
 	
-	PROCESS.define('binding', function(method, context){
-		return _.proxy(method, context);
-	});
+	process.binding = function(method){
+		return Global[method];
+	}
 	
-	PROCESS.define('chdir', function(dir){
-		this.property('worker', dir)
-	});
+	process.chdir = function(dir){
+		this.worker = dir;
+	}
 	
-	PROCESS.define('cwd', function(){
-		return this['private']('worker');
-	});
+	process.cwd = function(){
+		return this.worker;
+	}
 	
-	PROCESS.define('uptime', function(){
+	process.uptime = function(){
 		return new Date().getTime() - timer;
-	});
+	}
 	
-	PROCESS.define('umask', function( mask ){
-		return mask || 0;
-	});
-	
-	PROCESS.define('createServer', function( app ){
-		app = path.resolve(Server.MapPath('./'), app);
+	process.createServer = function(app){
+		app = path.isAbsolute(app) ? app : path.resolve(Server.MapPath('./'), app);
 		if ( this.env.SERIES_ENV === 'development' ){
 			(new ROOT.Require(app)).main.exports();
 		}else{
@@ -108,8 +115,6 @@
 				this.emit('error', e);
 			}
 		}
-	});
-		
-	process = new PROCESS();
+	}
 	
 }).call(this);

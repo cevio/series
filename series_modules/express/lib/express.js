@@ -28,7 +28,6 @@ function createApplication() {
 
   util.merge(app, proto);
 	app.init();
-	req.path = app.parseURL(req);
   
   return app;
 }
@@ -50,14 +49,3 @@ createApplication.applicationParse = require('./middlewares/applicationParse.js'
 createApplication.cookieParse = require('./middlewares/cookieParse.js');
 createApplication.bodyParse = require('./middlewares/bodyParse.js');
 createApplication.jsonpParse = require('./middlewares/jsonpParse.js');
-
-/*var middlewares = ['template', 'sessionParse', 'applicationParse', 'cookieParse', 'bodyParse', 'jsonpParse'];
-
-_.each(middlewares, function(ware){
-	createApplication[ware] = function(){
-		var middleware = require('./middlewares/' + ware + '.js');
-		if ( _.isFunction(middleware) ){
-			return middleware.apply(null, arguments);
-		}
-	}
-});*/

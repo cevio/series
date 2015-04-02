@@ -534,11 +534,11 @@ function mergeParams(params, parent) {
   }
 
   // make copy of parent for base
-  var obj = mixin({}, parent);
+  var obj = util.mixin({}, parent);
 
   // simple non-numeric merging
   if (!(0 in params) || !(0 in parent)) {
-    return mixin(obj, params);
+    return util.mixin(obj, params);
   }
 
   var i = 0;
@@ -560,7 +560,7 @@ function mergeParams(params, parent) {
     }
   }
 
-  return mixin(parent, params);
+  return util.mixin(parent, params);
 }
 
 // restore obj props after function

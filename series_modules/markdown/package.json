@@ -1,0 +1,23 @@
+﻿{
+	"name": "markdown",
+	"description": "markdown 解析引擎，对文档书写极为友好。兼容现在市面上最多的语法，但是没法和马克飞象比。但是语法解析已经非常强大。",
+	"version": "2.11.4",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"main": "index.js",
+	"dev": "index.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-modules-markdown"
+	},
+	"homepage": "http://api.webkits.cn/module/markdown",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md"
+}

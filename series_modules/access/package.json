@@ -1,0 +1,22 @@
+﻿{
+	"name": "access",
+	"description": "Access 数据库操作组件，支持Access中间件，调用方便，兼容MSSQL组件调用方式",
+	"version": "1.0.1",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"main": "index.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-modules-access"
+	},
+	"homepage": "http://api.webkits.cn/modules/access",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "README.md"
+}

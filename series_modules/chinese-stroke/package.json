@@ -1,0 +1,34 @@
+{
+  "name": "chinese-stroke",
+  "version": "0.0.1",
+  "description": "获取汉字的笔画数. Retrieve the stroke count of Chinese character.",
+  "main": "chinese-stroke.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/nodeunit test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:fayland/chinese-stroke.git"
+  },
+  "keywords": [
+    "Chinese",
+    "stroke",
+    "bihua"
+  ],
+  "author": "Fayland Lam <fayland@gmail.com>",
+  "homepage": "https://github.com/fayland/chinese-stroke",
+  "readme": "README.md",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fayland/chinese-stroke/issues"
+  },
+  "dependencies": {
+
+  },
+  "devDependencies": {
+    "nodeunit": "~0.8.2"
+  }
+}

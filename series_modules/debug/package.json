@@ -1,0 +1,13 @@
+﻿{
+	"name": "debug",
+	"description": "一个SPM控制台调试组件，用这个组件能很方便地调试到系统的变量以及错误地方。",
+	"version": "1.0.0",
+	"author": {
+		"name": "evio",
+		"url": "http://webkits.cn",
+		"email": "evio@vip.qq.com"
+	},
+	"homepage": "http://api.webkits.cn/readme/debug",
+	"main": "debug.js",
+	"readme": "readme.md"
+}

@@ -1,0 +1,22 @@
+﻿{
+	"name": "spm",
+	"description": "series iis node server engine package manager.",
+	"version": "2.1.189",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-module-spm"
+	},
+	"homepage": "http://api.webkits.cn/readme/spm",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md",
+	"main": "index.js"
+}

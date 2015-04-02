@@ -20,34 +20,80 @@ function html_escape(code){
 
 var spm = exports = module.exports = function(){
 	var factory = spm.cmd.apply(spm, arguments);
-	var fns = spm.handle(factory);
+	var fns = spm.handle(factory), ret;
 	if ( fns && fns.fn && fns.context ){
 		if ( _.isFunction(fns.fn) ){
-			var ret = fns.fn.apply(fns.context, factory.args);
-			if ( ret && ret.error === 0 ){
-				return ret;
-			}else{
-				if ( ret && ret.error ){
-					return ret;
+			ret = fns.fn.apply(fns.context, factory.args);
+			if ( ret ){
+				if ( sys.indexOf(factory.name) > -1 ){
+					return ['log', html_escape(JSON.stringify(ret))]
 				}else{
-					return { error: 0, chunks: ['- # ' + html_escape(JSON.stringify(ret))] };
+					return ret;
 				}
+			}else{
+				return ['success', html_escape(JSON.stringify(ret))];
 			}
 		}else{
 			return fns.fn;
 		}
-	};
+	}else{
+		if ( fns && !fns.fn && fns.context ){
+			var n = {
+				"-v": "version",
+				"-d": "description"
+			};
+			
+			var get = false, values;
+
+			if ( fns.method && fns.configs ){
+				for ( var o in n  ){
+					if ( new RegExp('^' + o + '$', 'i').test(fns.method) ){
+						values = fns.configs[n[o]] || 'not defined';
+						get = true;
+						break;
+					}
+				}
+			}
+			
+			if ( get ){
+				return ['info', values];
+			}
+			
+			if ( _.isFunction(fns.context.help) ){
+				ret = fns.help.apply(fns.context, factory.args);
+				if ( ret ){
+					return ret;
+				}else{
+					return ['list', 'no match method, you can use ' + factory.name + ' help', spm.list(fns.context, factory.name)];
+				}
+			}else{
+				return ['list', 'no match method, you can use ' + factory.name + ' help', spm.list(fns.context, factory.name)];
+			}
+		}
+	}
+}
+
+spm.list = function(modal, name){
+	var chunks = [];
+	for ( var i in modal ){
+		chunks.push('<strong>' + i + '</strong>: &lt; ' + name + ' ' + i + ' [-args...] &gt;');
+	}
+	return chunks;
 }
 
 spm.handle = function(factory){
 	var localmodule = null
-		,	localmethod = null;
+		,	localmethod = null
+		,	packages = null;
 		
 	if ( factory ){
 		if ( factory.name === 'spm' ){
 			localmodule = require('./spm.js');
 			if ( localmodule[factory.method] ){
 				localmethod = localmodule[factory.method];
+			}
+			if ( fs.exist(path.resolve(__dirname, './package.json')) ){
+				packages = require('./package.json');
 			}
 		}else if ( sys.indexOf(factory.name) > -1 ){
 			localmodule = (new Function('return ' + factory.name))();
@@ -61,6 +107,7 @@ spm.handle = function(factory){
 				var spmFile = path.resolve(folder, 'spm.js');
 				if ( fs.exist(packageFile) ){
 					var configs = require(packageFile);
+					packages = configs;
 					if ( configs.spm ){
 						spmFile = path.resolve(folder, configs.spm);
 					}
@@ -86,7 +133,7 @@ spm.handle = function(factory){
 		}
 	}
 	
-	return { fn: localmethod, context: localmodule };
+	return { fn: localmethod, context: localmodule, configs: packages, method: factory.method };
 }
 
 spm.cmd = function(){
@@ -97,6 +144,10 @@ spm.cmd = function(){
 	var ModuleName = arguments[0]
 		,	ModuleMethod = arguments[1]
 		,	ModuleArguemnts = slice.call(arguments, 2) || [];
+		
+	if ( /^\-h$/i.test(ModuleMethod) ){
+		ModuleMethod = 'help';
+	}
 
 	return {
 		name: ModuleName,

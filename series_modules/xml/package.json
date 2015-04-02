@@ -1,0 +1,23 @@
+﻿{
+	"name": "xml",
+	"description": "XML操作类，类似JQ的选择器，不同的是，我们以路径为选择器，而非节点。几乎具有jq的所有几本操作方法",
+	"version": "1.0.1",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"main": "index.js",
+	"dev": "index.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-modules-xml"
+	},
+	"homepage": "http://api.webkits.cn/module/xml",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md"
+}

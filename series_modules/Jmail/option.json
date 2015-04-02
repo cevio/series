@@ -1,0 +1,7 @@
+{
+	"smtp": "smtp.qq.com",		// 邮箱服务器
+	"mail": "user@qq.com",		// 发件箱地址
+	"name": "测试用户",			// 发件人姓名
+	"user": "user",				// 登录用户名
+	"pass": "password"			// 登录密码
+}

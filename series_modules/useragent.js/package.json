@@ -1,0 +1,40 @@
+{
+  "name": "useragent.js",
+  "version": "0.1.1",
+  "description": "A simple project that allows you to display details about a computer's operating system or web browser with a user-agent.",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodeunit test",
+    "coveralls": "jscoverage lib && UAJS_COV=1 nodeunit --reporter=lcov test | coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zsxsoft/useragent.js.git"
+  },
+  "keywords": [
+    "UserAgent"
+  ],
+  "author": "zsx <zsx@zsxsoft.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zsxsoft/useragent.js/issues"
+  },
+  "devDependencies": {
+    "nodeunit": "*",
+    "jscoverage": "*",
+    "coveralls": "*",
+    "grunt": "~0.4.1",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-closurecompiler": "~0.9.9",
+    "grunt-text-replace": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-transcoding": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-jshint": "*",
+    "grunt-contrib-nodeunit": "*"
+  },
+  "homepage": "https://github.com/zsxsoft/useragent.js",
+  "dependencies": {
+    "coveralls": "^2.11.2"
+  }
+}

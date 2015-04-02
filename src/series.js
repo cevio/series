@@ -13,6 +13,7 @@ module.exports = {
 			'asp.date.js',
 			'asp.class.js',
 			'asp.event.js',
+			'asp.events.js',
 			'asp.process.js',
 			'asp.path.js',
 			'asp.fso.js',

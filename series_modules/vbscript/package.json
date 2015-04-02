@@ -1,0 +1,22 @@
+﻿{
+	"name": "vbscript",
+	"description": "虽然我们的框架是完全基于Jscript脚本实现的，但是为了满足更多用户的使用习惯，我们提供了vbscript模块。该模块提供了常用的vbscript函数。",
+	"version": "1.0.0",
+	"author": {
+		"name": "xonyen",
+		"email": "i@xybk.net",
+		"url": "http://www.xybk.net"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-module-vbscript"
+	},
+	"homepage": "http://api.webkits.cn/module/vbscript",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md",
+	"main": "./index.js"
+}

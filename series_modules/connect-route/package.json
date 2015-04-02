@@ -1,0 +1,15 @@
+{
+	"name" : "connect-route",
+	"version" : "0.1.5",
+	"description" : "Simple and fast router for Connect",
+	"keywords": [ "router", "connect" ],
+	"author" : "Vadim M. Baryshev <vadimbaryshev@gmail.com>",
+	"main" : "index.js",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/baryshev/connect-route.git"
+	},
+	"engines" : { "node": ">= 0.4.0" },
+	"homepage": "https://github.com/baryshev/connect-route",
+	"readme": "README.md"
+}

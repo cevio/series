@@ -1,32 +1,12 @@
 ﻿{
 	"name": "url",
-	"description": "url module for series or brower.",
+	"description": "一个处理URL的组件，也是NODEJS的原生URL处理组件",
 	"version": "1.0.0",
 	"author": {
-		"name": "evio shen",
-		"email": "evio@vip.qq.com",
-		"url": "http://webkits.cn"
+		"name": "evio",
+		"url": "http://webkits.cn",
+		"email": "evio@vip.qq.com"
 	},
-	"main": "index.js",
-	"dev": "url.js",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "http://github.com/cevio/url"
-	},
-	"homepage": "http://series.webkits.cn/modules/url",
-	"keywords": [
-		"javascript",
-		"url",
-		"session",
-		"series",
-		"framework",
-		"web",
-		"api"
-	],
-	"engines": {
-		"node": ">= 0.10.0",
-		"series": ">= 1.0.0"
-	},
-	"readme": "no file found"
+	"homepage": "http://api.webkits.cn/readme/url",
+	"main": "./dist/url.min.js"
 }

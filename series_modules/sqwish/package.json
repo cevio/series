@@ -1,0 +1,35 @@
+{
+  "name": "sqwish",
+  "description": "a tool for compressing CSS",
+  "homepage": "https://github.com/ded/sqwish",
+  "version": "0.2.2",
+  "author": {"name":"Dustin Diaz <@ded>"},
+  "keywords": [
+    "minify",
+    "css",
+    "compress"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ded/sqwish.git"
+  },
+  "main": "src/index.js",
+  "engines": {
+    "node": ">= 0.4.1"
+  },
+  "directories": {
+    "lib": "src",
+    "bin": "bin"
+  },
+  "devDependencies": {
+    "sink-test": ">= 0.0.6"
+  },
+  "scripts": {
+    "test": "node tests/tests.js"
+  },
+  "preferGlobal": true,
+  "bin": {
+    "sqwish": "bin/sqwish"
+  },
+	"readme":"README.md"
+}

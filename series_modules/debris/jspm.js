@@ -3,34 +3,37 @@ define(['jquery'], function($){
 	var proto = {};
 	
 	proto.download = function(from, to){
-		var that = this;
 		if ( !from || !to ){
-			this.pushError('- # [from] and [to] arguments required.');
+			spm.put('error', '[from] and [to] arguments required.');
 			return Promise.reject();
-		}
-		var masker = this.delay();
-		return new Promise(function(resolve, reject){
-			masker[2].innerHTML = '0%';
-			debrisDownload.call(that, 'debris download ' + from + ' ' + to, masker, function(){
-				masker[0].stop();
-				resolve();
-			}, function(e){
-				that.pushError('- # debris download catch error.');
-				masker[0].stop();
-				reject(e);
+		};
+		
+		return spm.send('debris size ' + from).then(function(){
+			var percent = spm.ui.percent();
+			return new Promise(function(resolve, reject){
+				debrisDownload('debris download ' + from + ' ' + to, percent, function(){
+					percent.stop();
+					resolve();
+				}, function(e){
+					spm.put('error', e.message);
+					percent.stop();
+					reject(e);
+				});
 			});
 		});
 	}
 	
+	
+	
 	function debrisDownload(cmd, masker, callback, errors){
 		var that = this;
-		this.post({cmd: cmd}).then(function(key){
+		spm.local({cmd: cmd}).then(function(key){
 			if ( key.error === 0 ){
 				if ( key.percent < 1 ){
-					masker[2].innerHTML = (key.percent * 100).toFixed(2) + '%';
-					debrisDownload.call(that, cmd, masker, callback, errors);
+					masker.set(key.percent);
+					debrisDownload(cmd, masker, callback, errors);
 				}else{
-					masker[2].innerHTML = '100%';
+					masker.set(1);
 					callback();
 				}
 			}else{

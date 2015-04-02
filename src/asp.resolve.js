@@ -1,97 +1,103 @@
-;(function(path){
+﻿(function(){
 	
-	this.Resolve = {
-		fso: new ActiveXObject("Scripting.FileSystemObject"),
-		FolderExist: function(pather){ return this.fso.FolderExists(pather); },
-		FileExist: function(pather){ return this.fso.FileExists(pather); },
+	var _ = this._ || _
+		,	obj = new ActiveXObject("Scripting.FileSystemObject")
+		,	ft = function(pather){ return obj.FileExists(pather); }
+		,	cwd = path.server(process.cwd())
+		, series_modules = process.bags
+		;
 		
-		get: function(dirname, selector){
-			selector = selector.replace(/\\/g, '/');
-			if ( /^\.\//.test(selector) || /^\.\.\//.test(selector) || /\//.test(selector) ){
-				var a = path.resolve(dirname, selector);
-				var b = this.ext(a);
-				if ( a != b ){
-					return b;
-				}else{
-					return this.lazy(a);
-				}
-			}else{
-				var cwd = Server.MapPath(process.cwd());
-				var that = this;
-				var findPatherBags = function(dir, sec){
-					var isRoot = path.relative(dir, cwd).length === 0,
-						realPath = path.resolve(dir, process.bags, sec),
-						pather = path.resolve(dir, sec),
-						_pather = that.ext(pather),
-						matcher;
-
-					if ( that.FolderExist(realPath) && !!( matcher = that.match(realPath) ) ){ return matcher; }
-					else if ( pather != _pather ){ return _pather; }	
-					else if ( isRoot ){ return that.ext(path.resolve(dirname, sec)); }
-					else{ return findPatherBags(path.resolve(dir, '..'), sec); };
-				};
-				return this.lazy(findPatherBags(dirname, selector));
-			}
-		},
-		
-		match: function( pather ){
-			var packPather = path.resolve(pather, 'package.json');
-
-			if ( this.FileExist(packPather) ){
-					var PackageData = JSON.parse(fs.readFile(packPather));
-					if ( PackageData.main && PackageData.main.length > 0 ){ 
-						packPather = path.resolve(pather, PackageData.main); 
-					}else{ 
-						packPather = path.resolve(pather, 'index.js'); 
-					};
-					
-					var _pp = packPather;
-					if (  !/\.js$/i.test(packPather) ){
-						_pp = _pp + '.js';
-					}
-					
-					if ( this.FileExist(packPather) ) { 
-						return packPather; 
-					}
-					else if ( this.FileExist(_pp) ){
-						return _pp;
-					}
-					else if ( this.FolderExist(packPather) ){
-						var zindex = path.resolve(packPather, 'index.js');
-						if ( this.FileExist(zindex) ){
-							return zindex;
-						}
-					}
-			}else{
-				packPather = path.resolve(pather, 'index.js');
-				if ( this.FileExist(packPather) ) return packPather; 
-			};
-		},
-		
-		lazy: function(pather){
-			if ( !this.FileExist(pather) && this.FolderExist(pather) ){
-				var matches = this.match(pather);
-				if ( matches ){
-					return matches;
-				}
-			};
-			return pather;
-		},
-		
-		ext: function(pather){
-			if ( this.FileExist(pather) ){
-				return pather;
-			}
+	this.Resolve = misify;
+	this.Resolve.get = misify;
+	this.Resolve.dirify = pickMatcher;
+	this.Resolve.filify = MatchSelect;
+	
+	/**
+	 * 判断是否已经到根目录
+	 */
+	function reachRoot(pather){
+		return path.relative(pather, cwd).length === 0;
+	}
+	
+	/** 
+	 * 对于任意一个文件夹下的查询规则
+	 * 优先查询package.json中的main，判断main所在文件是否存在
+	 * 其次查询index.js文件是否存在
+	 */
+	function pickMatcher(dir){
+		var packageFile = path.resolve(dir, 'package.json')
+			,	indexFile = path.resolve(dir, 'index.js')
+			,	resolveFile;
 			
-			if ( !/\.js$/i.test(pather) ){
-				var pathers = pather + '.js';
-				if ( this.FileExist(pathers) ){
-					return pathers;
+		if ( ft(packageFile) ){
+			var cofnigs = JSON.parse(fs.readFile(packageFile));
+			if ( cofnigs.main ){
+				resolveFile = MatchSelect(path.resolve(dir, cofnigs.main));
+			}
+		}
+		
+		if ( !resolveFile && ft(indexFile) ){
+			resolveFile = indexFile;
+		}
+		
+		return resolveFile;
+	}
+	
+	/**
+	 * 判断一个选择器路径是否存在
+	 * 优先判断文件是否存在
+	 * 其次判断文件+js是否存在
+	 * 最后判断文件夹
+	 */
+	function MatchSelect(file){
+		var ext = path.extname(file).toLowerCase();
+		if ( ft(file) ){
+			return file;
+		}
+		else{
+			if ( ext !== '.js' ){
+				var _file = file + '.js';
+				if ( ft(_file) ){
+					return _file;
 				}
 			}
-			
-			return pather;
+			// 如果查询条件是a.js为文件夹，那么直接搜索文件夹。
+			return pickMatcher(file);
 		}
 	}
 	
-}).call(this, path);
+	/**
+	 * 查询模块的所在文件
+	 * 通过递归查询，逐级往上查找
+	 * 区分系统模块和用户模块
+	 */
+	function searchSysModule(dir, file){
+		var _file = path.resolve(dir, series_modules, file);
+		var isRoot = reachRoot(dir);
+		var getter = MatchSelect(_file);
+		if ( getter ){
+			return getter;
+		}else{
+			if ( !isRoot ){
+				return searchSysModule(path.resolve(dir, '..'), file);
+			}
+		}
+	}
+	
+	/**
+	 * 模糊查找模块
+	 */
+	function misify(dir, file){
+		if ( /^[\.|\/]/.test(file) ){
+			return MatchSelect(path.resolve(dir, file));
+		}else{
+			var sysModule = searchSysModule(dir, file);
+			if ( sysModule ){
+				return sysModule;
+			}else{
+				return MatchSelect(path.resolve(dir, file));
+			}
+		}
+	}
+	
+}).call(this);

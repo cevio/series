@@ -6,7 +6,7 @@ var slice = Array.prototype.slice;
 function main(method, argvs, callback){
 	try{
 		if ( argvs.length === 0 ){
-			return { error: 1, message: 'arguments needed.' };
+			return ['error', 'arguments needed.'];
 		}else{
 			var url = argvs[0];
 			var arg = [], z = {};
@@ -26,10 +26,10 @@ function main(method, argvs, callback){
 				html = callback(html);
 			}
 			
-			return { error: 0, chunks: ['<div style="padding-left:15px; color:#555;">' + html + '</div>'] };
+			return ['success', html];
 		}
 	}catch(e){
-		return { error: 1, message: '- # ajax ' + method + ' catch error.' + e.message };
+		return ['error', 'ajax ' + method + ' catch error.' + e.message];
 	}
 }
 

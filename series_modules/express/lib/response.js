@@ -1,18 +1,8 @@
-var 
-	$ = require('cookie'),
-	res = module.exports = new Global.watcher();
+var res = module.exports = new Global.watcher();
 	
 res.buffers = [];
 res.handles = [];
 res._jsons = {};
-	
-res.cookie = function(){
-	return $.cookie.apply($, arguments);
-};
-
-res.clearCookie = function(){
-	return $.removeCookie.apply($, arguments);
-};
 
 res.get = function(key){
 	return process.env[key];

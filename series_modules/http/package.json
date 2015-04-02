@@ -1,0 +1,12 @@
+﻿{
+	"name": "http",
+	"description": "处理HTTP请求的组件。支持事件，基本兼容nodejs原生的HTTP组件",
+	"version": "1.0.0",
+	"author": {
+		"name": "evio",
+		"url": "http://webkits.cn",
+		"email": "evio@vip.qq.com"
+	},
+	"homepage": "http://api.webkits.cn/readme/http",
+	"main": "./index.js"
+}

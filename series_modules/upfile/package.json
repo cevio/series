@@ -1,0 +1,22 @@
+﻿{
+	"name": "upfile",
+	"description": "ASP无组件上传模块，目前世界上唯一一个已公布的不依赖于VBScript的，纯粹使用JScript实现的ASP文件上传处理。",
+	"version": "1.0.0",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-module-upfile"
+	},
+	"homepage": "http://api.webkits.cn/module/upfile",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md",
+	"main": "./index.js"
+}

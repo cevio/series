@@ -4,12 +4,12 @@
 	process.env.SERIES_ENV = "production"; //development production
 	
 	// 全局错误对象事件
-	process.on('error', function(ev, error){
+	process.on('error', function(error){
 		console.log('<br />', 'Process Error: ', error.message, '<br />');
 	});
 	
 	// 全局require失效处理提示
-	process.on('loadModule:unexist', function(ev, filename){
+	process.on('loadModule:unexist', function(filename){
 		console.log('<br />', '\nProcess Catch Require Resolve Pather Error: ' + filename + '\n', '<br />');
 	});
 	

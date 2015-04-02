@@ -1,0 +1,22 @@
+﻿{
+	"name": "Cryptography",
+	"description": "集成一些常用的加密解密算法，如：base64、md5、sha1等。",
+	"version": "1.0.0",
+	"author": {
+		"name": "xonyen",
+		"email": "i@xybk.net",
+		"url": "http://www.xybk.net"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-module-Cryptography"
+	},
+	"homepage": "http://api.webkits.cn/module/Cryptography",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md",
+	"main": "dist/Cryptography.min.js"
+}

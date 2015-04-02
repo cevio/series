@@ -1260,7 +1260,107 @@ var out = {
 
         return this;
     },
+	
+	/**
+	 * 第一步：生成每个文件的压缩数据
+	 */
+	compressfile: function(offset, options) {
+        options = extend(options || {}, {
+            base64: true,
+            compression: "DEFLATE",
+            type: "base64",
+            comment: null
+        });
 
+        utils.checkSupport(options.type);
+
+        var zipData = [],
+            localDirLength = 0,
+            centralDirLength = 0,
+            writer = new StringWriter(),
+            utfEncodedComment = utils.transformTo("string", "");
+
+        // first, generate all the zip parts.
+        for (var name in this.files) {
+            if (!this.files.hasOwnProperty(name)) {
+                continue;
+            }
+            var file = this.files[name];
+
+            var compressionName = file.options.compression || options.compression.toUpperCase();
+            var compression = compressions[compressionName];
+            if (!compression) {
+                throw new Error(compressionName + " is not a valid compression method !");
+            }
+
+            var compressedObject = generateCompressedObjectFrom.call(this, file, compression);
+
+            var zipPart = generateZipParts.call(this, name, file, compressedObject, localDirLength + offset);
+            localDirLength += zipPart.fileRecord.length + compressedObject.compressedSize;
+            centralDirLength += zipPart.dirRecord.length;
+            zipData.push(zipPart);
+        }
+
+        for (i = 0; i < zipData.length; i++) {
+            writer.append(zipData[i].fileRecord);
+            writer.append(zipData[i].compressedObject.compressedContent);
+        }
+		// 中央目录结构，写到所有文件内容的最后
+		var record = new StringWriter();
+        for (i = 0; i < zipData.length; i++) {
+            record.append(zipData[i].dirRecord);
+        }
+
+        var compressData = writer.finalize();
+		var centralData = record.finalize();
+
+		return {
+			dataf: (options.base64) ? base64.encode(compressData) : compressData,
+			datac: (options.base64) ? base64.encode(centralData) : centralData,
+			localDirLength: localDirLength,
+			centralDirLength: centralDirLength,
+			zipDataLenght: zipData.length
+		}
+    },
+	 
+	/**
+	 * 第二步：写入结尾数据，生成zip
+	 */
+	generatepack: function(localDirLength, centralDirLength, zipDataLength){	
+        var utfEncodedComment = utils.transformTo("string", "");
+		
+		var dirEnd = "";
+
+        // end of central dir signature
+        dirEnd = signature.CENTRAL_DIRECTORY_END +
+        // number of this disk
+        "\x00\x00" +
+        // number of the disk with the start of the central directory
+        "\x00\x00" +
+        // total number of entries in the central directory on this disk
+        decToHex(zipDataLength, 2) +
+        // total number of entries in the central directory
+        decToHex(zipDataLength, 2) +
+        // size of the central directory   4 bytes
+        decToHex(centralDirLength, 4) +
+        // offset of start of central directory with respect to the starting disk number
+        decToHex(localDirLength, 4) +
+        // .ZIP file comment length
+        decToHex(utfEncodedComment.length, 2) +
+        // .ZIP file comment
+        utfEncodedComment;
+		
+		var writer = new StringWriter();
+		
+        writer.append(dirEnd);
+
+        var zip = writer.finalize();
+		
+		var end = {zipDataLength: zipDataLength,centralDirLength:centralDirLength,localDirLength:localDirLength};
+		
+		return base64.encode(zip);
+	},
+	
     /**
      * Generate the complete zip file
      * @param {Object} options the options to generate the zip file :

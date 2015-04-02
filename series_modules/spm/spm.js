@@ -120,11 +120,11 @@ exports.gruntsmo = function(){
 	try{
 		var configs = require('../../src/series.js');
 		var UglifyJS = require('UglifyJS');
-		var content = '';
+		var content = [];
 		_.each(configs.compressor.smo, function(compressor){
-			content += '\n\n' + '// Grunt From /src/' + compressor + '\n' + fs.readFile(path.resolve(__dirname, '../../src/' + compressor)) + '\n';
+			content.push(UglifyJS('// Grunt From /src/' + compressor + '\n' + fs.readFile(path.resolve(__dirname, '../../src/' + compressor))));
 		});
-		var dist = UglifyJS(content);
+		var dist = content.join(';');
 		
 		fs.writeFile(path.resolve(__dirname, '../../dist/series.smo.js'), dist);
 		return { error: 0 }
@@ -168,7 +168,7 @@ exports.packin = function(){
 exports.unlink = function(pather){
 	pather = path.resolve(spmRunner, pather);
 	fs.unlink(pather);
-	return { error: 0, chunks: ['- % delete file [' + pather + '] success!'] };
+	return ['success', 'delete file ' + pather + ' success!'];
 }
 
 exports.jspm = function(dir){
@@ -202,7 +202,7 @@ exports.jspm = function(dir){
 		jspm[name] = '/' + jspm[name].replace(/\\/g, '/');
 	}
 	
-	return { error: 0, jspm: jspm, chunks: [add ? '<font color="#069">- % [' + name + '] been add to global package libary.</font>' : '<font color="#069">- % no more [' + name + '] need been add.</font>'] };
+	return { jspm: jspm, info: add ? '[' + name + '] been add to global package libary.' : 'no more [' + name + '] need been add.' };
 }
 
 function getGloablConfigs(){
@@ -223,9 +223,9 @@ exports.user = function(name, publickey){
 		configs.appid = name;
 		configs.appkey = publickey;
 		fs.writeFile(configFile, JSON.stringify(configs));
-		return { error: 0, chunks: ['<font color="green">- # input user success!</font>'] };
+		return ['success', 'create user success!'];
 	}catch(e){
-		return { error: 1, message: 'input user info catch error.' };
+		return ['error', 'input user info catch error from remote server.']
 	}
 }
 
@@ -243,12 +243,12 @@ exports.adduser = function(username){
 	
 	if ( data.error === 0 ){
 		var chunks = [];
-		chunks.push('<pre>  * appid: ' + username + '</pre>');
-		chunks.push('<pre>  * appkey: ' + data.data.publickey + '</pre>');
-		chunks.push('<pre>  * please use "spm user appid appkey" to set appid and appkey. </pre>');
-		return { error: 0, chunks: chunks };
+		chunks.push('appid: ' + username);
+		chunks.push('appkey: ' + data.data.publickey);
+		chunks.push('please use "spm user appid appkey" to set appid and appkey.');
+		return ['list', 'Add user to remote server success', chunks];
 	}else{
-		return data;
+		return ['error', data.message];
 	}
 }
 
@@ -265,11 +265,9 @@ exports.rmuser = function(username){
 	});
 	
 	if ( data.error === 0 ){
-		var chunks = [];
-		chunks.push('- # user [' + username + '] has been removed from server.');
-		return { error: 0, chunks: chunks };
+		return ['success', 'user [' + username + '] has been removed from remote server.']
 	}else{
-		return data;
+		return ['error', data.message];
 	}
 }
 
@@ -282,21 +280,257 @@ exports.status = function(){
 	var chunks = [];
 	
 	if ( configs.appid ){
-		chunks.push('<pre>  * User Name: ' + configs.appid + '</pre>');
+		chunks.push('User Name: ' + configs.appid);
 	}
 	
 	if ( configs.appkey ){
-		chunks.push('<pre>  * Public Key: ' + configs.appkey + '</pre>');
+		chunks.push('Public Key: ' + configs.appkey);
 	}
 	
 	if ( !chunks.length ){
-		chunks.push('<font color="red">- # no more user information. please add!</font>');
+		return ['error', 'no more user information. please add!'];
+	}else{
+		return ['list', 'Local SPM Rights', chunks];
 	}
 	
-	return { error: 0, chunks: chunks };
 }
 
-exports.post = function(mark){
+var BlockSize = 100 * 1024;					// 分块传输大小
+
+// 分块传输文件，暂时未全部修复完毕
+exports.postzip = function(modal, zipfile){
+	try {
+		// 读一读配置文件
+		var configs = readConfigs();
+				
+		if ( !configs.appid || !configs.appkey ){
+			return { error: 1, message: 'no rights to post module.' };
+		}
+		
+		var mark = modal + configs.appid + '_zip_file';	// Application标记
+		
+		zipfile = path.resolve(__dirname, zipfile);
+		if (!fs.exist(zipfile)) {
+			return { error: 1, message: 'zip file not exist.' };
+		}
+		
+		var obj = new ActiveXObject('Adodb.Stream');
+			
+			obj.Type = 1;
+			obj.Mode = 3;
+			obj.Open();
+			obj.LoadFromFile(zipfile);
+			
+		// 把config.json和readme.md给弄进去
+		var modulePath = path.resolve(__dirname, '../../series_modules/' + modal);
+		if (!fs.exist(modulePath + '/package.json')) {
+			return { error: 1, message: 'no package file for this module.' };
+		}
+		
+		var moduleConfig = fs.readFile(modulePath + '/package.json', {encoding: 'buffer'});
+		var zipSize = obj.Size;
+		obj.Position = obj.Size;
+		obj.Write(moduleConfig);
+		var configSize = obj.Size - zipSize;
+		
+		var config = require(modulePath + '/package.json');
+		var readme = config.readme || 'readme.md';
+		if (!fs.exist(modulePath + '/' + readme)) {
+			return { error: 1, message: 'no readme file for this module.' };
+		}
+		
+		var moduleReadme = fs.readFile(modulePath + '/' + readme, {encoding: 'buffer'});
+		obj.Position = obj.Size;
+		obj.Write(moduleReadme);
+		var readmeSize = obj.Size - zipSize - configSize;
+		
+		// 将文件内容写入Application
+		Application.Lock();
+		Application.Contents.Remove(mark);
+		Application(mark) = obj;
+		Application.Unlock();					// 貌似要全部读完再解除锁定?
+		
+		// 告诉服务器老子要传几次数据
+		var total = obj.Size;
+		var block = BlockSize;					
+		var times = Math.ceil(total / block);
+		
+		var http = new ActiveXObject('Microsoft.XMLHTTP');
+		var msg;
+		var url = web + '/post/module?appid=' + configs.appid + '&appkey=' + configs.appkey;	// 先不传数据
+			url = url + '&status=begin&modal=' + modal + '&times=' + times;
+			url = url + '&config=' + configSize + '&readme=' + readmeSize;
+	
+		http.open('GET', url, false);
+		http.onreadystatechange = function() {
+			if (http.readyState === 4) {
+				if (http.status === 200){
+					msg = JSON.parse(BinaryToString(http.responseBody, 'utf-8'));
+				}else{
+					msg = { error: http.status, message: 'post module catch status [' + http.status + '] error.' };
+				}
+			}
+		};
+		http.send();
+		
+		// 告诉浏览器老子要传几次数据
+		if ( msg.error === 0 ){
+			return { error: 0, chunks: ['<font color="green">- # post module ready, you need post ' + times + ' times.</font>'], times: times }
+		}else{
+			return { error: 1, message: msg.message || 'can not find the error.' };
+		}
+	}catch(e){
+		return { error: 1, message: 'post module catch error.' + e.message };
+	}
+}
+
+// 每次传10KB，直到传完为止，post与postzip通用
+exports.postblock = function(modal, i){
+	try {
+		// 读一读配置文件
+		var configs = readConfigs();
+				
+		if ( !configs.appid || !configs.appkey ){
+			return { error: 1, message: 'no rights to post module.' };
+		}
+		
+		var mark = modal + configs.appid;	// Application标记	
+		
+		// 翻今晚的牌子啦
+		var block = BlockSize;					
+		
+		var pos = i * block;
+		var obj = Application(mark + '_zip_file');
+			obj.Position = pos;		
+		var num = pos + block < obj.size ? block : obj.size - pos ;	// 该次读取的内容大小
+		var bin = obj.Read(num);
+		
+		// 好啦，把这块内容妥妥地发送给服务器吧	
+		var http = new ActiveXObject('Microsoft.XMLHTTP');
+		var size = num;		// 发送的数据大小就是这次读取的数据大小啦
+		var msg;
+		var url = web + '/post/module?appid=' + configs.appid + '&appkey=' + configs.appkey;	// 先不传数据
+			url = url + '&status=sends&modal=' + modal + '&times=' + i;
+
+		http.open('POST', url, false);
+		http.setRequestHeader('Content-Type', 'multipart/form-data');
+		http.setRequestHeader('Content-Length', size);
+		http.setRequestHeader('Cache-Control', 'no-cache, must-revalidate');
+		http.onreadystatechange = function() {
+			if (http.readyState === 4) {
+				if (http.status === 200){
+					msg = JSON.parse(BinaryToString(http.responseBody, 'utf-8'));
+				}else{
+					msg = { error: http.status, message: 'post module catch status [' + http.status + '] error.' };
+				}
+			}
+		};
+		http.send(bin);
+	
+		if ( msg.error === 0 ){
+			//return { error: 0, chunks: ['<font color="green">- # send data success: block ' + i +'.</font>'] };
+			return { error: 0 };
+		}else{
+			return { error: 1, message: msg.message || 'can not find the error.' };
+		}
+	}catch(e){
+		return { error: 1, message: msg.message || 'send data error: block ' + i };
+	}
+}
+
+// 传输结束的时候，清理缓存，针对于postzip
+exports.postclear = function(modal){
+	try {
+		// 读一读配置文件
+		var configs = readConfigs();
+				
+		if ( !configs.appid || !configs.appkey ){
+			return { error: 1, message: 'no rights to post module.' };
+		}
+		
+		var mark = modal + configs.appid + '_zip_file';	// Application标记
+
+		Application.Lock();
+		Application.Contents.Remove(modal);
+		Application.Unlock();
+		
+		return { error: 0, chunks: ['<font color="green">- # post module success, everything is done.</font>'] }
+	}catch(e){
+		return { error: 1, message: 'clear cache catch error.' + e.message };
+	}
+}
+
+// 重写post方法，改为分块上传
+exports.post = function(modal){
+	try {
+		// 读一读配置文件
+		var configs = readConfigs();
+				
+		if ( !configs.appid || !configs.appkey ){
+			return { error: 1, message: 'no rights to post module.' };
+		}
+		
+		var mark = modal + configs.appid;	// Application标记	
+		
+		// 把config.json和readme.md给弄进去
+		var modulePath = path.resolve(__dirname, '../../series_modules/' + modal);
+		if (!fs.exist(modulePath + '/package.json')) {
+			return { error: 1, message: 'no package file for this module.' };
+		}
+		
+		var moduleConfig = fs.readFile(modulePath + '/package.json', {encoding: 'buffer'});
+		var obj = Application(mark + '_zip_file');
+		var zipSize = obj.Size;
+		obj.Position = obj.Size;
+		obj.Write(moduleConfig);
+		var configSize = obj.Size - zipSize;
+		
+		var config = require(modulePath + '/package.json');
+		var readme = config.readme || 'readme.md';
+		if (!fs.exist(modulePath + '/' + readme)) {
+			return { error: 1, message: 'no readme file for this module.' };
+		}
+		
+		var moduleReadme = fs.readFile(modulePath + '/' + readme, {encoding: 'buffer'});
+		obj.Position = obj.Size;
+		obj.Write(moduleReadme);
+		var readmeSize = obj.Size - zipSize - configSize;
+		
+		// 告诉服务器老子要传几次数据
+		var total = obj.Size;
+		var block = 100 * 1024;					// 分块大小为100KB
+		var times = Math.ceil(total / block);
+
+		var http = new ActiveXObject('Microsoft.XMLHTTP');
+		var msg;
+		var url = web + '/post/module?appid=' + configs.appid + '&appkey=' + configs.appkey;
+			url = url + '&status=begin&modal=' + modal + '&times=' + times;
+			url = url + '&config=' + configSize + '&readme=' + readmeSize;
+	
+		http.open('GET', url, false);
+		http.onreadystatechange = function() {
+			if (http.readyState === 4) {
+				if (http.status === 200){
+					msg = JSON.parse(BinaryToString(http.responseBody, 'utf-8'));
+				}else{
+					msg = { error: http.status, message: 'post module catch status [' + http.status + '] error.' };
+				}
+			}
+		};
+		http.send();
+		
+		// 告诉浏览器老子要传几次数据
+		if ( msg.error === 0 ){
+			return { error: 0, chunks: ['<font color="green">- # post module ready, you need post ' + times + ' times.</font>'], times: times }
+		}else{
+			return { error: 1, message: msg.message || 'can not find the error.' };
+		}
+	}catch(e){
+		return { error: 1, message: 'post module catch error.' + e.message };
+	}
+}
+
+/*exports.post = function(mark){
 	try{
 		var configFile = path.resolve(__dirname, '../../dist/config.json');
 		var configs = {};
@@ -340,7 +574,7 @@ exports.post = function(mark){
 	}catch(e){
 		return { error: 1, message: 'post module catch error.' + e.message };
 	}
-}
+}*/
 
 function ZIP(folder, err){
 	var d = path.resolve(folder, 'package.json');
@@ -466,4 +700,15 @@ function BinToBuffer(bin) {
 		});
 	};
 	return buf;
+}
+
+// 读一读配置文件
+function readConfigs(){
+	var configFile = path.resolve(__dirname, '../../dist/config.json');
+	var configs = {};
+	if ( fs.exist(configFile) ){
+		configs = require(configFile);
+	}
+	
+	return configs;
 }

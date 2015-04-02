@@ -29,7 +29,6 @@ app.settings = {
 	"env": null,
 	"jsonp callback name": null,
 	"json replacer JSON replacer": null,
-	"default file": null,
 	"case sensitive routing": null,
 	"strict routing": null,
 	"view cache": null,
@@ -73,7 +72,6 @@ app.defaultConfiguration = function(){
   var env = process.env.SERIES_ENV || 'development';
   this.set('env', env);
 	this.set('jsonp callback name', 'jsonp');
-  this.set('default file', 'default.asp');
   this.disable('case sensitive routing');
 	this.disable('strict routing');
 	this.enable('view cache');
@@ -241,46 +239,6 @@ app.enable = function(setting){
 
 app.disable = function(setting){
   return this.set(setting, false);
-};
-
-app.parseURL = function(req){
-	var url = process.env.QUERY_STRING;
-	var defaultFile = this.get('default file');
-
-	if ( /^404\;/.test(url) ){
-		url = url.split(';')[1].split('/');
-		
-		var _host;
-		
-		if ( url.length > 2 ){
-			_host = url.slice(0, 2);
-			req.host = url.slice(2, 3).join('/').replace(':80', '');
-			_host.push(req.host);
-			_host = _host.concat(url.slice(3));
-			url = ['']. concat(url.slice(3)).join('/');
-			req.url = _host.join('/');
-		}else{
-			req.host = url.slice(2).join('/').replace(':80', '');
-			url = '/';
-			req.url = url.join('/');
-		}
-	}else{
-		url = process.env.PATH_INFO;
-		req.url = 'http://' + process.env.HTTP_HOST + (process.env.SERVER_PORT == '80' ? '' : ':' + process.env.SERVER_PORT) + process.env.PATH_INFO;
-		req.host = process.env.HTTP_HOST;
-		if ( url.toLowerCase() === '/' + defaultFile.toLowerCase() ){
-			url = '/';
-		}
-	};
-
-	var querys = url.indexOf('?');
-	if ( querys > -1 ){
-		var _querystring = url.substring(querys + 1).replace(/^\&/, '');
-		req.query = _.fromQuery(_querystring);
-		url = url.substring(0, querys);
-	};
-
-	return url;
 };
 
 /**
@@ -568,6 +526,6 @@ app.render = function(name, options, fn){
 app.listen = function(){
 	var res = this.response;
 	this(this.request, res, function(){ res.end(); });
-	
+
 	return this;
 };

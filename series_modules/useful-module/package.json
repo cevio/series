@@ -1,0 +1,35 @@
+{
+  "name": "useful-module",
+  "version": "0.0.1",
+  "description": "Useful tools",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sven65/Useful-Module"
+  },
+  "files": [
+    "README.md"
+  ],
+  "readme": "README.md",
+  "keywords": [
+    "password",
+    "generator",
+    "pass",
+    "gen",
+    "useful",
+    "tools",
+    "tool",
+    "index",
+    "hex",
+    "colors"
+  ],
+  "author": "Mackan90096 <thormax5@gmail.com>",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/Sven65/Useful-Module/issues"
+  },
+  "homepage": "https://github.com/Sven65/Useful-Module"
+}

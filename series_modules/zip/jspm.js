@@ -1,12 +1,12 @@
 ﻿define(['jquery'], function($){
 	var proto = {};
 	
-	proto.get = function(dir, keys){
+	proto.get = function(dir, modal, keys){
 		var masker = this.delay();
 		var that = this;
-		var str;
+		var mark;	// 内存标识，重要!!!
 		$(masker[2]).html('0%');
-		return this.main('zip files ' + dir).then(function(msg){
+		return this.main('zip files "' + dir + '" ' + modal).then(function(msg){
 			var files = msg.files;
 			
 			if ( files.length === 0 ){
@@ -16,16 +16,16 @@
 			}
 
 			var i = 0;
-			str = msg.str;
+			mark = msg.mark;
 			
-			_.each(files, function(file){
-				that.pushSuccess('<pre>  <font color="#aaa">* ' + file + '</font></pre>');
-			});
+//			_.each(files, function(file){
+//				that.pushSuccess('<pre>  <font color="#aaa">* ' + file + '</font></pre>');
+//			});
 			
 			var postZip = function(resolve, reject){
 				if ( files[i] ){
 					try{
-						proto.process.call(that, files[i], dir, str, i).then(function(data){
+						proto.process.call(that, files[i], dir, mark, i).then(function(data){
 							if ( data.error === 0 ){
 								masker[2].innerHTML = (((i + 1) / files.length) * 100).toFixed(2) + '%';
 								i++;
@@ -46,9 +46,11 @@
 				postZip(a, b);
 			});
 		}).then(function(){
+			return that.send('zip create ' + mark);
+		}).then(function(){
 			masker[0].stop();
 			that.pushSuccess('<font color="#9C3">- % zip compress process done! </font>');
-			return str;
+			return mark;
 		});
 	}
 	

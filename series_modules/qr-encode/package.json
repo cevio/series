@@ -1,0 +1,37 @@
+{
+  "name": "qr-encode",
+  "version": "0.3.0",
+  "description": "Encode a string into a QR code. 由【小影】重新封装，支持中文，支持保存图片成文件，支持Adodb.Stream输出.",
+  "keywords": [
+    "qr",
+    "qr code",
+    "QR",
+    "barcode",
+    "barcodes",
+    "bar",
+    "code",
+    "encode",
+    "2d"
+  ],
+  "devDependencies": {
+    "mocha": "^1.20.1",
+    "terst": "0.0.1",
+    "mochify": "^0.10.0",
+    "coveralls": "^2.10.1",
+    "istanbul": "^0.2.14"
+  },
+  "repository": {
+    "url": "https://github.com/cryptocoinjs/qr-encode",
+    "type": "git"
+  },
+  "main": "index.js",
+  "author": "Matthew Mueller",
+  "homepage": "https://github.com/MatthewMueller/qr-code",
+  "dependencies": {},
+  "scripts": {
+    "coverage": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --reporter list test/*.js --timeout 15000",
+    "coveralls": "npm run-script coverage && node ./node_modules/.bin/coveralls < coverage/lcov.info",
+    "test": "npm run-script unit",
+    "unit": "./node_modules/.bin/mocha"
+  }
+}

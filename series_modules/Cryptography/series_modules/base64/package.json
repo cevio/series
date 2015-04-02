@@ -1,0 +1,31 @@
+﻿{
+	"name": "base64",
+	"description": "base64 module for series or brower.",
+	"version": "1.0.0",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"main": "index.js",
+	"dev": "base64.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/base64"
+	},
+	"homepage": "http://series.webkits.cn/modules/base64",
+	"keywords": [
+		"javascript",
+		"base64",
+		"series",
+		"framework",
+		"web",
+		"api"
+	],
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "no file found"
+}

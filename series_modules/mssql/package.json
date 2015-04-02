@@ -1,0 +1,23 @@
+﻿{
+	"name": "mssql",
+	"description": "SQL SERVER 数据库支持框架。集成了数据库连接，DBO操作，存储过程。使用与调用方法按照程序员书写习惯制定。而且提供了强大的mssql中间件。",
+	"version": "1.0.0",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"main": "./dist/mssql.min.js",
+	"dev": "index.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-modules-mssql"
+	},
+	"homepage": "http://api.webkits.cn/module/mssql",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md"
+}

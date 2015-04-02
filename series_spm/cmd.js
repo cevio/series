@@ -4,15 +4,17 @@ var spm = require('spm');
 module.exports = function(req, res){
 	var body = req.body.cmd;
 	if ( body ){
+		// 解析命令参数为数组
 		body = formatCmd(body);
+		
+		// 执行命令参数
 		var rets = spm.apply(spm, body);
-		if ( rets ){
-			res.json(rets);
-		}else{
-			res.json({ error: 1, message: 'can not find the namespace for this command.' });
-		}
+		
+		if ( rets ){ res.log(JSON.stringify(rets)); }
+		else{ res.log(JSON.stringify(['error', 'can not find the namespace for this command.'])); };
+		
 	}else{
-		res.json({ error: 1, message: 'unknow command.' });
+		res.log(JSON.stringify(['error', 'unknown command.']));
 	}
 };
 

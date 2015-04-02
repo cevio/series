@@ -1,0 +1,22 @@
+﻿{
+	"name": "crc32",
+	"description": "对服务端文件进行crc32校验。生成校验码。",
+	"version": "1.0.1",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"main": "index.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-modules-crc32"
+	},
+	"homepage": "http://api.webkits.cn/module/crc32",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md"
+}

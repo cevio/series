@@ -1,0 +1,23 @@
+﻿{
+	"name": "cookie",
+	"description": "非普通cookie的ASP操作，通过设置头部来处理cookie。书写方法完全和jquery cookie 相同。",
+	"version": "1.0.2",
+	"author": {
+		"name": "evio shen",
+		"email": "evio@vip.qq.com",
+		"url": "http://webkits.cn"
+	},
+	"main": "index.js",
+	"dev": "cookie.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-modules-cookie"
+	},
+	"homepage": "http://api.webkits.cn/module/cookie",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md"
+}

@@ -1,0 +1,22 @@
+﻿{
+	"name": "Jmail",
+	"description": "使用Jmail发送邮件，只需要服务器支持免费的Jmail组件。",
+	"version": "1.0.0",
+	"author": {
+		"name": "xonyen",
+		"email": "i@xybk.net",
+		"url": "http://www.xybk.net"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/cevio/series-module-Jmail"
+	},
+	"homepage": "http://api.webkits.cn/module/jmail",
+	"engines": {
+		"node": ">= 0.10.0",
+		"series": ">= 1.0.0"
+	},
+	"readme": "readme.md",
+	"main": "./index.js"
+}
